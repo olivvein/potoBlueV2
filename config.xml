@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.megster.bluefruitle" version="0.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>potoBlue</name>
+    <description>
+        Connect to potoCounter
+    </description>
+    <author href="http://github.com/olivvein">
+        Olivier Veinand
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+     <preference name="phonegap-version" value="cli-8.0.0" />
+    <plugin name="cordova-plugin-ble-central" spec="~1.1.4" />
+    <plugin name="cordova-plugin-file" source="npm" spec="~4.3.3" />
+    <plugin name="cordova-plugin-geolocation-android-activator" />
+    <plugin name="cordova-plugin-geolocation" />
+    <plugin name="cordova-plugin-webserver" source="npm" />
+    <plugin name="cordova-plugin-httpd" source="npm" />
+    <preference name="AndroidPersistentFileLocation" value="Internal" />
+    <preference name="AndroidExtraFilesystems" value="files,files-external,documents,sdcard,cache,cache-external,assets,root" />
+    <icon src="icon.png" />
+    <plugin name="cordova-plugin-insomnia" spec="https://github.com/EddyVerbruggen/Insomnia-PhoneGap-Plugin.git" />
+    <preference name="orientation" value="portrait" />
+</widget>

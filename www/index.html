@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1" />
+    <link rel="stylesheet" href="css/onsenui.css">
+    <link rel="stylesheet" href="css/onsen-css-components.min.css">
+    <link rel="stylesheet" href="css/material-design-iconic-font.min.css">
+
+    <script src="js/onsenui.min.js"></script>
+    <title>potoBlue</title>
+</head>
+
+<body>
+    <ons-splitter>
+        <ons-splitter-side id="menu" side="left" width="220px" collapse swipeable>
+            <ons-page>
+                <ons-list>
+                    <ons-list-item onclick="app.load('home.html')" tappable>
+                        Home
+                    </ons-list-item>
+                    <ons-list-item onclick="app.load('action.html')" tappable>
+                        Actions
+                    </ons-list-item>
+                    <ons-list-item onclick="app.load('settings.html')" tappable>
+                        Settings
+                    </ons-list-item>
+                    <ons-list-item onclick="app.load('about.html')" tappable>
+                        About
+                    </ons-list-item>
+                </ons-list>
+            </ons-page>
+        </ons-splitter-side>
+        <ons-splitter-content id="content" page="home.html"></ons-splitter-content>
+    </ons-splitter>
+
+    <template id="home.html">
+        <ons-page>
+          <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button onclick="app.open()">
+                <ons-icon icon="ion-navicon, material:md-menu"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+
+            <div class="center">
+              potoBlue V2
+            </div>
+          </ons-toolbar>
+          <p style="text-align: center; opacity: 0.6; padding-top: 20px;" onclick="app.refreshDeviceList()">
+            List All The Devices
+          </p>
+          <ul class="list" id="deviceList">
+                
+          </ul>
+            <img src="css/icon.png" width="100%"></img>
+        </ons-page>
+      </template>
+    <template id="action.html">
+        <ons-page>
+          <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button onclick="app.open()">
+                <ons-icon icon="md-menu"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">
+              <span id="bleName"></span> | <span id="theTime"></span>
+            </div>
+          </ons-toolbar>
+          <ons-row align="center">
+              <ons-col >
+                      <ons-toolbar-button>
+                              <ons-icon
+                              icon="md-input-power">
+                            </ons-icon>
+                            <span id="voltage"></span>
+                      </ons-toolbar-button>
+                    </ons-col>
+              <ons-col>
+                <ons-toolbar-button>
+                      <ons-icon
+                      icon="md-sun">
+                    </ons-icon>
+                    <span id="temperature"></span>
+                </ons-toolbar-button>
+              </ons-col>
+              <ons-col>
+                <ons-toolbar-button>
+                      <ons-icon
+                      icon="md-pin">
+                    </ons-icon>
+                    <span id="dataNumber"></span>
+                </ons-toolbar-button>
+              </ons-col>
+          </ons-row>
+          <div class="toast toast--material">
+            <button id="infoButton" onclick="app.askInfos()" class="toast__button toast--material__button">Infos</button>
+            <div class="toast__message toast--material__message"></div>
+            <button id="commandButton" class="toast__button toast--material__button">Send</button>
+            <div class="toast__message toast--material__message"></div>
+            <button id="graphButton" class="toast__button toast--material__button">Graph</button>
+            <div class="toast__message toast--material__message"></div>
+            <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Exit</button>
+        </div>
+        </ons-page>
+        
+      </template>
+    <template id="settings.html">
+        <ons-page>
+          <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button onclick="app.open()">
+                <ons-icon icon="md-menu"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">
+              Settings
+            </div>
+          </ons-toolbar>
+          
+          <ons-list>
+            <ons-list-item>
+              <label for="check-1" class="right">
+                Livecount
+              </label>
+              <label class="switch switch--material">
+                <input type="checkbox" class="switch__input switch--material__input" input-id="check-1">
+                <div class="switch__toggle switch--material__toggle">
+                  <div class="switch__handle switch--material__handle">
+                  </div>
+                </div>
+              </label>
+            </ons-list-item>
+            <ons-list-item>
+                <label for="check-2" class="right">
+                  Reset
+                </label>
+                <label class="switch switch--material">
+                  <input type="checkbox" class="switch__input switch--material__input" input-id="check-2">
+                  <div class="switch__toggle switch--material__toggle">
+                    <div class="switch__handle switch--material__handle">
+                    </div>
+                  </div>
+                </label>
+              </ons-list-item>
+              <ons-list-item>
+                  <label for="check-3" class="right">
+                    ChartMode
+                  </label>
+                  <label class="switch switch--material">
+                    <input type="checkbox" class="switch__input switch--material__input" input-id="check-3">
+                    <div class="switch__toggle switch--material__toggle">
+                      <div class="switch__handle switch--material__handle">
+                      </div>
+                    </div>
+                  </label>
+                </ons-list-item>
+          </ons-list>
+              
+        </ons-page>
+        
+      </template>
+
+    <template id="about.html">
+        <ons-page>
+          <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button onclick="app.open()">
+                <ons-icon icon="md-menu"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">
+              About
+            </div>
+          </ons-toolbar>
+
+          <ons-input id="testdate-input" type="date" name= "test" float>
+        </ons-page>
+      </template>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript">
+        app.initialize();
+    </script>
+</body>
+
+</html>
