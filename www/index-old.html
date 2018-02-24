@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1" />
+
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <link rel="stylesheet" href="css/onsenui.css">
+    <link rel="stylesheet" href="css/onsen-css-components.min.css">
+    <script src="js/onsenui.min.js"></script>
+    <title>BluefruitLE</title>
+</head>
+<ons-page>
+
+    <body>
+        <div class="app">
+            <ons-modal direction="up">
+                <div style="text-align: center">
+
+
+
+
+
+
+
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <H1 id="percent">
+                        Loading...
+                    </H1>
+
+
+
+
+
+
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+                    <p>
+                        <ons-progress-bar indeterminate></ons-progress-bar>
+                    </p>
+
+                </div>
+            </ons-modal>
+            <div class="toolbar toolbar--material ">
+                <div class="toolbar__left toolbar--material__left">
+                    <span id="theTime"></span>
+                </div>
+                <div class="toolbar__center " id="bleName">PotoCounter
+                </div>
+                <div class="toolbar__right toolbar--material__right">
+                    <span id="theTimeb"></span>
+                </div>
+
+            </div>
+            <div class="toolbar  ">
+
+                <div class="toolbar__center " id="blePos">
+                </div>
+
+
+            </div>
+            <div id="mainPage">
+                <div id="url"></div>
+                <ul class="list list--material" id="deviceList">
+
+                </ul>
+
+                <div class="toast toast--material">
+                    <div class="toast__message toast--material__message">Refresh Bluetooth List</div>
+                    <button id="refreshButton" class="toast__button toast--material__button">Refresh</button>
+                </div>
+
+
+
+
+
+            </div>
+            <div id="detailPage" hidden="true">
+                <ons-progress-bar id="progressVal" value="0"></ons-progress-bar>
+                <div>
+                    <pre id="resultDiv" hidden="false" ripple></pre>
+                </div>
+
+                <canvas id="myCanvas" hidden="true" width="350" height="200" style="border:1px solid #c3c3c3;">
+                </canvas>
+                <div id="zoomView" hidden="true">
+                    <ons-range style="width: 100%;" id="zoomViewMin" value="0"></ons-range>
+                    <ons-range style="width: 100%;" id="zoomViewMax" value="100"></ons-range>
+                </div>
+
+                <div>
+                    <input type="search" placeholder="Search" class="search-input" hidden="false" id="messageInput" value="infos" />
+                </div>
+
+                <button class="button button--outline" onclick="messageInput.value='hyst,'+messageInput.value;">Hyst</button>
+                <button class="button button--outline" onclick="messageInput.value='high,'+messageInput.value;">High</button>
+                <button class="button button--outline" onclick="messageInput.value='low,'+messageInput.value;">LOW</button>
+                <button class="button button--outline" onclick="messageInput.value='liveCount,'+messageInput.value;">liveCount</button>
+
+
+
+
+
+
+
+
+                <div class="toast toast--material" id="footerPage" hidden="true">
+
+                    <button id="infoButton" class="toast__button toast--material__button">Infos</button>
+                    <div class="toast__message toast--material__message"></div>
+                    <button id="sendButton" class="toast__button toast--material__button">AsskAll</button>
+                    <div class="toast__message toast--material__message"></div>
+                    <button id="commandButton" class="toast__button toast--material__button">Send</button>
+                    <div class="toast__message toast--material__message"></div>
+                    <button id="graphButton" class="toast__button toast--material__button">Graph</button>
+                    <div class="toast__message toast--material__message"></div>
+                    <button id="disconnectButton" class="toast__button toast--material__button">Exit</button>
+                </div>
+
+
+            </div>
+        </div>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript">
+            app.initialize();
+        </script>
+    </body>
+</ons-page>
+
+</html>

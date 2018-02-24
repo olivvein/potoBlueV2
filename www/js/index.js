@@ -18,15 +18,10 @@
 /* jshint browser: true , devel: true*/
 'use strict';
 
-
-
-
-var bluefruit = {
-    serviceUUID: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
-    txCharacteristic: '6e400002-b5a3-f393-e0a9-e50e24dcca9e', // transmit is from the phone's perspective
-    rxCharacteristic: '6e400003-b5a3-f393-e0a9-e50e24dcca9e' // receive is from the phone's perspective
-};
-
+var modal = document.querySelector('ons-modal');
+var myDeviceName = "";
+var theMode = "normal";
+var toiMemeTuSais = "kD0%mspEl";
 var myDevice = "";
 var buffLen = 10000;
 var dataBuffer = new Uint8Array(buffLen);
@@ -37,6 +32,64 @@ var myBle = {};
 myBle.data = buffLen;
 myBle.right = 0;
 myBle.left = 0;
+
+var dataFrom = "0";
+var dataTo = "0";
+
+function createFile(dirEntry, fileName, isAppend) {
+    dirEntry.getFile(fileName, { create: true, exclusive: false }, function(fileEntry) {
+        writeFile(fileEntry, null, isAppend);
+    }, debugLog("File created done"));
+
+}
+
+function writeFile(fileEntry, dataObj) {
+    fileEntry.createWriter(function(fileWriter) {
+        fileWriter.onwriteend = function() {
+            console.log("Successful file write...");
+            readFile(fileEntry);
+        };
+        fileWriter.G = function(e) {
+            console.log("Failed file write: " + e.toString());
+        };
+        if (!dataObj) {
+            dataObj = new Blob([allDatas], { type: 'text/plain' });
+        }
+        allDatas = "";
+        fileWriter.write(dataObj);
+    });
+};
+
+function readFile(fileEntry) {
+    fileEntry.file(function(file) {
+        var reader = new FileReader();
+        reader.onloadend = function() {
+            console.log("Successful file read: " + fileEntry.fullPath);
+        };
+        reader.readAsText(file);
+    }, debugLog("read done"));
+}
+
+var bluefruit = {
+    serviceUUID: '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
+    txCharacteristic: '6e400002-b5a3-f393-e0a9-e50e24dcca9e', // transmit is from the phone's perspective
+    rxCharacteristic: '6e400003-b5a3-f393-e0a9-e50e24dcca9e' // receive is from the phone's perspective
+};
+
+
+function myDecode(base62String) {
+    var val = 0,
+        i = 0,
+        length = base62String.length,
+        characterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    for (; i < length; i++) {
+        val += characterSet.indexOf(base62String[i]) * Math.pow(62, length - i - 1);
+    }
+    return val;
+};
+
+
+
 
 function bytesToString(buffer) {
     return String.fromCharCode.apply(null, new Uint8Array(buffer));
@@ -58,7 +111,6 @@ function stringToBytes(string) {
 var app = {
     initialize: function() {
         this.bindEvents();
-
         window.plugins.insomnia.keepAwake();
     },
     bindEvents: function() {
@@ -68,12 +120,28 @@ var app = {
         var menu = document.getElementById('menu');
         menu.open();
     },
-
     load: function(page) {
-        var content = document.getElementById('content');
-        var menu = document.getElementById('menu');
-        content.load(page)
-            .then(menu.close.bind(menu));
+        if ((page == "action.html") || (page == "settings.html")) {
+            if (myDevice == "") {
+                alert("you are not connected");
+            } else {
+                if (page == "settings.html") {
+                    theMode = "settings";
+                }
+                if (page == "action.html") {
+                    theMode = "action";
+                }
+                var content = document.getElementById('content');
+                var menu = document.getElementById('menu');
+                content.load(page).then(menu.close.bind(menu));
+                app.askInfos();
+            }
+        } else {
+            var content = document.getElementById('content');
+            var menu = document.getElementById('menu');
+            content.load(page).then(menu.close.bind(menu));
+        }
+
     },
     loadMainPage: function() {
         app.load("home.html");
@@ -82,7 +150,7 @@ var app = {
     },
     onDeviceReady: function() {
         app.refreshDeviceList();
-
+        app.getFileList();
     },
     refreshDeviceList: function() {
         console.log("debut refresh");
@@ -90,9 +158,46 @@ var app = {
         if (deviceList) {
             deviceList.innerHTML = "";
         }
-        //deviceList.innerHTML = "";
         console.log("Refresh");
         ble.scan([bluefruit.serviceUUID], 5, app.onDiscoverDevice, app.onError);
+    },
+    requestAndroidFS: function(filename) {
+        debugLog("Requesting File System");
+        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
+            console.log('file system open: ' + dirEntry.name);
+            dirEntry.getDirectory('potoBlueV2', { create: true }, function(subDirEntry) {
+                var isAppend = true;
+                var theFilename = filename + ".txt"
+                createFile(subDirEntry, theFilename, isAppend);
+            }, console.log);
+        }, debugLog("Fs done"));
+    },
+    getFileList: function() {
+        debugLog("Requesting File System");
+        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
+            console.log('file system open: ' + dirEntry.name);
+            dirEntry.getDirectory('potoBlueV2', { create: true }, function(subDirEntry) {
+                console.log("Subentry");
+                var reader = subDirEntry.createReader();
+                reader.readEntries(
+                    function(entries) {
+                        entries.forEach(function(ent) {
+                            var file = ent.fullPath.split("/")[2];
+                            var fiVal = file.split("_");
+                            var name = fiVal[0];
+                            var from = fiVal[1];
+                            var to = fiVal[2];
+                            to = to.substring(0, to.length - 4);
+                            console.log(name + " - " + from + " - " + to);
+                        });
+                    },
+                    function(err) {
+                        console.log(err);
+                    }
+                );
+
+            }, console.log);
+        }, debugLog("Fs done"));
     },
     onDiscoverDevice: function(device) {
         var listItem = document.createElement('li'),
@@ -102,19 +207,20 @@ var app = {
         listItem.innerHTML = html;
         listItem.class = "list-item list-item--tappable";
         listItem.addEventListener("click", function(e) {
-            app.connect(device.id);
+            app.connect(device.id, device.name);
         }, false);
         var deviceList = document.getElementById('deviceList');
         deviceList.appendChild(listItem);
-        console.log(device.id);
+        console.log(device.id, device.name);
     },
-    connect: function(target) {
+    connect: function(target, nameT) {
         console.log("Connection to " + target);
         var deviceId = target,
             onConnect = function(peripheral) {
                 app.determineWriteType(peripheral);
                 ble.startNotification(deviceId, bluefruit.serviceUUID, bluefruit.rxCharacteristic, app.onData, app.onError);
                 myDevice = deviceId;
+                myDeviceName = nameT;
                 app.load("action.html");
                 app.askInfos();
             };
@@ -130,11 +236,72 @@ var app = {
         buffLen = 500;
         requested = "infos";
         dataBuffer = new Uint8Array(buffLen);
-        var dataToSend = "*kD0%mspEl,infos,0,1400000$";
+        var dataToSend = "*" + toiMemeTuSais + ",infos$";
+        myBle.right = 0;
+        myBle.left = 0;
+        app.sendData(dataToSend);
+    },
+    askInfosRange: function() {
+        lastIndex = 0;
+        buffLen = 500;
+        requested = "infos";
+        dataBuffer = new Uint8Array(buffLen);
+        var dataToSend = "*" + toiMemeTuSais + ",infos" + dataFrom + "," + dataTo + "$";
+        myBle.right = 0;
+        myBle.left = 0;
+        app.sendData(dataToSend);
+    },
+    sendCommand: function(command) {
+        lastIndex = 0;
+        buffLen = 500;
+        requested = "infos";
+        dataBuffer = new Uint8Array(buffLen);
+        var dataToSend = "*" + toiMemeTuSais + "," + command + "$";
+        app.sendData(dataToSend);
+    },
+    askAllDatas: function() {
+        lastIndex = 0;
+        buffLen = myBle.data;
+        dataBuffer = new Uint8Array(buffLen);
+        requested = "sendAll2";
+        console.log("Asking All Datas...");
+        modal.show();
+        var dataToSend = "*" + toiMemeTuSais + ",data$";
         app.sendData(dataToSend);
     },
     modeDev: function() {
-
+        console.log("livecount is :" + livecountState.checked);
+        console.log("graphMode is :" + graphState.checked);
+        console.log("the input date : " + dateState.value);
+        console.log(dateState.value);
+        var inputedDate = moment(dateState.value, "YYYY-MM-DD").format("DD/MM/YYYY");
+        console.log("Date modif is : " + inputedDate);
+        if (inputedDate != myBle.date) {
+            console.log("Ble Date : " + myBle.date);
+            console.log("Sending date = " + inputedDate);
+            var theD = inputedDate.split("/");
+            var theCommand = "setDate," + theD[0] + "," + theD[1] + "," + theD[2];
+            console.log(theCommand);
+            app.sendCommand(theCommand);
+        }
+        if (timeState.value != myBle.time) {
+            console.log("Ble Time : " + myBle.time);
+            console.log("Sending date = " + timeState.value);
+            var theD = timeState.value.split(":");
+            var theCommand = "setTime," + theD[0] + "," + theD[1] + "," + theD[2];
+            console.log(theCommand);
+            app.sendCommand(theCommand);
+        }
+        if (livecountState.checked != myBle.liveCount) {
+            console.log("Sending Livecount = " + Number(livecountState.checked));
+            var theCommand = "liveCount," + Number(livecountState.checked);
+            app.sendCommand(theCommand);
+        }
+        if (nameState.value != myBle.name) {
+            console.log("Sending Name = " + nameState.value);
+            var theCommand = "setName," + nameState.value;
+            app.sendCommand(theCommand);
+        }
     },
     onError: function(reason) {
         alert("ERROR: " + JSON.stringify(reason)); // real apps should use notification.alert
@@ -143,10 +310,7 @@ var app = {
         console.log("Sending data :");
         var success = function() {
             console.log("success");
-            //resultDiv.innerHTML = resultDiv.innerHTML + "Sent: " + dataToSend + "<br/>";
-            //resultDiv.scrollTop = resultDiv.scrollHeight;
         };
-
         var failure = function() {
             console.log("Failed writing data to the bluefruit le");
         };
@@ -154,9 +318,6 @@ var app = {
         console.log(messagee);
         console.log("to : " + myDevice);
         var deviceId = myDevice;
-
-
-
         if (messagee.length >= 18) {
             console.log("Message bigger than 18");
             var arraYofStringss = [];
@@ -166,7 +327,6 @@ var app = {
             console.log(arraYofStringss[0]);
             var mleng = arraYofStringss.length;
             var ml = 0;
-
             for (var i = 0; i < mleng; i++) {
                 var mm = arraYofStringss[i];
                 if (i != mleng - 1) {
@@ -214,9 +374,6 @@ var app = {
                 );
             }
         }
-
-
-
     },
     onData: function(data) {
         var temp = new Uint8Array(data);
@@ -224,34 +381,23 @@ var app = {
         if (dataBuffer.indexOf(35) != -1) { //Si caractere de fin : #
             lastIndex = temp.length + lastIndex;
             console.log("lastIndex :" + lastIndex);
-            debugLog("end of transmission de ouf");
+            //debugLog("end of transmission de ouf");
             console.log("end of transmission de ouf");
             app.prepareData();
             lastIndex = 0;
         }
         if (requested != "infos") {
-            /*
+
             var progressVal = document.getElementById("progressVal");
             progressVal.value = 100 * (lastIndex / myBle.data);
-            var percent = document.getElementById("percent");
+            /*var percent = document.getElementById("percent");
             percent.innerHTML = Math.round(100 * (lastIndex / myBle.data)) + "%";
             */
         }
-
-
-
-
         if (lastIndex > buffLen) {
             console.log("too big" + lastIndex);
         }
         lastIndex = temp.length + lastIndex;
-
-
-
-
-
-
-
     },
     prepareData: function(event) { // save data to text file
         /*
@@ -282,7 +428,7 @@ var app = {
         stringArray = [];
         dataBuffer = new Uint8Array(buffLen);
         lastIndex = 0;
-        //progressVal.value = 0;
+        progressVal.value = 0;
         //resultDiv.innerHTML = resultDiv.innerHTML + "Fin <br/>";
         //resultDiv.scrollTop = resultDiv.scrollHeight;
 
@@ -303,20 +449,32 @@ var app = {
             });
             result.forEach(function(ll) {
                 //console.log(ll);
-                //debugLog(ll[0] + " is : " + ll[1]);
+                //console.log(ll[0] + " is : " + ll[1]);
                 //debugLog(ll);
                 if (ll[0] == "name") {
                     myBle.name = ll[1];
                     //blePos.innerHTML = posX + " " + posY;
                     bleName.innerHTML = myBle.name;
+                    if (theMode == "settings") {
+                        nameState.value = myBle.name;
+                    }
                 }
                 if (ll[0] == "date") {
-                    myBle.date = ll[1];
+                    myBle.date = moment(ll[1], "DD.MM.YYYY").format("DD/MM/YYYY");
+
+                    if (theMode == "settings") {
+                        dateState.value = moment(myBle.date, "DD/MM/YYYY").format("YYYY-MM-DD");
+                    }
+
                 }
                 if (ll[0] == "time") {
                     myBle.time = ll[1];
                     //var theTimeb = document.getElementById('theTimeb');
                     theTime.innerHTML = myBle.time;
+                    if (theMode == "settings") {
+
+                        timeState.value = myBle.time;
+                    }
                 }
                 if (ll[0] == "temp") {
                     myBle.temp = ll[1];
@@ -331,6 +489,16 @@ var app = {
                 }
                 if (ll[0] == "liveCount") {
                     myBle.liveCount = ll[1];
+                    if (ll[1] == "0") {
+                        myBle.liveCount = false;
+                    } else {
+                        myBle.liveCount = true;
+                    }
+                    if (theMode == "settings") {
+                        livecountState.checked = myBle.liveCount;
+
+                    }
+
                 }
                 if (ll[0] == "hysteresis") {
                     myBle.hysteresis = ll[1];
@@ -341,20 +509,16 @@ var app = {
                 }
                 if (ll[0] == "liveLeftMove") {
                     myBle.left = myBle.left + Number(ll[1]);
-                    /*var theTimeb = document.getElementById('theTimeb');
-                    theTimeb.innerHTML = myBle.left + "|" + myBle.right;
-                    console.log(myBle.left + "|" + myBle.right);
-                    console.log(ll);
-                    */
+                    if (theMode == "action") {
+                        liveNumber.innerHTML = myBle.left + "|" + myBle.right;
+                    }
                 }
                 if (ll[0] == "liveRightMove") {
                     myBle.right = myBle.right + Number(ll[1]);
-                    /*
-                    var theTimeb = document.getElementById('theTimeb');
-                    theTimeb.innerHTML = myBle.left + "|" + myBle.right;
-                    console.log(myBle.left + "|" + myBle.right);
-                    console.log(ll);
-                    */
+                    if (theMode == "action") {
+                        liveNumber.innerHTML = myBle.left + "|" + myBle.right;
+                    }
+
                 }
 
             });
@@ -440,15 +604,24 @@ var app = {
 
             });
             allDatas = 'time,gauche,droite\n';
+            var firstTime = "";
+            var lastTime = "";
             result.forEach(function(rr) {
+
                 if (rr[2] != undefined) {
+                    if (firstTime == "") {
+                        firstTime = rr[0];
+                    }
+                    lastTime = rr[0];
                     allDatas = allDatas + rr[0] + ',' + rr[1] + ',' + rr[2] + '\n';
+                    //console.log(rr[0] + ',' + rr[1] + ',' + rr[2]);
                 } else {
                     console.log("Wrong data :");
                     //console.log(rr);
                 }
             });
-            //app.requestAndroidFS("compressed");
+            modal.hide();
+            app.requestAndroidFS(myBle.name + "_" + firstTime + "_" + lastTime);
         }
         //resultDiv.innerHTML = resultDiv.innerHTML + "The data: <br/>";
         //resultDiv.innerHTML = resultDiv.innerHTML + myData;

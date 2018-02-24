@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="css/material-design-iconic-font.min.css">
 
     <script src="js/onsenui.min.js"></script>
+    <script src="js/moment.js"></script>
+    <!--<script src="http://192.168.137.1:8080/target/target-script-min.js#anonymous"></script>-->
+
     <title>potoBlue</title>
 </head>
 
@@ -27,14 +30,22 @@
                     <ons-list-item onclick="app.load('settings.html')" tappable>
                         Settings
                     </ons-list-item>
-                    <ons-list-item onclick="app.load('about.html')" tappable>
-                        About
+                    <ons-list-item onclick="app.load('chart.html')" tappable>
+                        Graphique
                     </ons-list-item>
                 </ons-list>
             </ons-page>
         </ons-splitter-side>
         <ons-splitter-content id="content" page="home.html"></ons-splitter-content>
     </ons-splitter>
+
+    <ons-modal direction="up">
+        <div style="text-align: center">
+            <p>
+                <ons-icon icon="md-spinner" size="28px" spin></ons-icon> Loading...
+            </p>
+        </div>
+    </ons-modal>
 
     <template id="home.html">
         <ons-page>
@@ -50,7 +61,7 @@
             </div>
           </ons-toolbar>
           <p style="text-align: center; opacity: 0.6; padding-top: 20px;" onclick="app.refreshDeviceList()">
-            List All The Devices
+            Afficher tous les potos
           </p>
           <ul class="list" id="deviceList">
                 
@@ -67,9 +78,10 @@
               </ons-toolbar-button>
             </div>
             <div class="center">
-              <span id="bleName"></span> | <span id="theTime"></span>
+              <span id="bleName"></span> | <span id="theTime"></span>| <span id="liveNumber"></span>
             </div>
           </ons-toolbar>
+          <ons-progress-bar id="progressVal" value="0"></ons-progress-bar>
           <ons-row align="center">
               <ons-col >
                       <ons-toolbar-button>
@@ -96,19 +108,22 @@
                 </ons-toolbar-button>
               </ons-col>
           </ons-row>
+
+          
           <div class="toast toast--material">
             <button id="infoButton" onclick="app.askInfos()" class="toast__button toast--material__button">Infos</button>
             <div class="toast__message toast--material__message"></div>
-            <button id="commandButton" class="toast__button toast--material__button">Send</button>
+            <button id="commandButton" onclick="app.askAllDatas()" class="toast__button toast--material__button">askAll</button>
             <div class="toast__message toast--material__message"></div>
             <button id="graphButton" class="toast__button toast--material__button">Graph</button>
             <div class="toast__message toast--material__message"></div>
-            <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Exit</button>
+            <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Quit</button>
         </div>
         </ons-page>
         
       </template>
     <template id="settings.html">
+      
         <ons-page>
           <ons-toolbar>
             <div class="left">
@@ -117,17 +132,43 @@
               </ons-toolbar-button>
             </div>
             <div class="center">
-              Settings
+              <span>Settings </span> | <span id="bleName"></span> | <span id="theTime"></span>
             </div>
           </ons-toolbar>
-          
+          <ons-progress-bar id="progressVal" value="0"></ons-progress-bar>
+          <ons-row align="center">
+              <ons-col >
+                      <ons-toolbar-button>
+                              <ons-icon
+                              icon="md-input-power">
+                            </ons-icon>
+                            <span id="voltage"></span>
+                      </ons-toolbar-button>
+                    </ons-col>
+              <ons-col>
+                <ons-toolbar-button>
+                      <ons-icon
+                      icon="md-sun">
+                    </ons-icon>
+                    <span id="temperature"></span>
+                </ons-toolbar-button>
+              </ons-col>
+              <ons-col>
+                <ons-toolbar-button>
+                      <ons-icon
+                      icon="md-pin">
+                    </ons-icon>
+                    <span id="dataNumber"></span>
+                </ons-toolbar-button>
+              </ons-col>
+          </ons-row>
           <ons-list>
             <ons-list-item>
-              <label for="check-1" class="right">
+              <label for="livecountState-1" class="right">
                 Livecount
               </label>
               <label class="switch switch--material">
-                <input type="checkbox" class="switch__input switch--material__input" input-id="check-1">
+                <input type="checkbox" class="switch__input switch--material__input" input-id="livecountState-1" id="livecountState">
                 <div class="switch__toggle switch--material__toggle">
                   <div class="switch__handle switch--material__handle">
                   </div>
@@ -135,36 +176,62 @@
               </label>
             </ons-list-item>
             <ons-list-item>
-                <label for="check-2" class="right">
-                  Reset
+                <label for="graphState-1" class="right">
+                  Graphique Mode
                 </label>
                 <label class="switch switch--material">
-                  <input type="checkbox" class="switch__input switch--material__input" input-id="check-2">
+                  <input type="checkbox" class="switch__input switch--material__input" input-id="graphState-1" id="graphState">
                   <div class="switch__toggle switch--material__toggle">
                     <div class="switch__handle switch--material__handle">
                     </div>
                   </div>
                 </label>
               </ons-list-item>
+            
               <ons-list-item>
-                  <label for="check-3" class="right">
-                    ChartMode
+                  <label for="graphState-1" class="right">
+                    Date
                   </label>
                   <label class="switch switch--material">
-                    <input type="checkbox" class="switch__input switch--material__input" input-id="check-3">
-                    <div class="switch__toggle switch--material__toggle">
-                      <div class="switch__handle switch--material__handle">
-                      </div>
-                    </div>
+                      <ons-input type="date" name= "test" float id="dateState"></ons-input>
+                    
                   </label>
                 </ons-list-item>
-          </ons-list>
+
+                <ons-list-item>
+                    <label for="graphState-1" class="right">
+                      Heure  
+                    </label>
+                    <label>
+                        <ons-input type="time" name= "test" float id="timeState"></ons-input>
+                      
+                    </label>
+                  </ons-list-item>
+                  <ons-list-item>
+                      <label for="graphState-1" class="right">
+                        Nom  
+                      </label>
+                      <label class="text-input">
+                          <ons-input type="text" name= "test" class="text-input" id="nameState"></ons-input>
+                        
+                      </label>
+                    </ons-list-item>
               
+          </ons-list>
+          <div class="toast toast--material">
+              <button id="infoButton" onclick="app.askInfos()" class="toast__button toast--material__button">Infos</button>
+              <div class="toast__message toast--material__message"></div>
+              <button id="commandButton" onclick="app.askAllDatas()" class="toast__button toast--material__button">askAll</button>
+              <div class="toast__message toast--material__message"></div>
+              <button id="graphButton" class="toast__button toast--material__button"  onclick="app.modeDev()">dev</button>
+              <div class="toast__message toast--material__message"></div>
+              <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Exit</button>
+          </div>
         </ons-page>
         
       </template>
 
-    <template id="about.html">
+    <template id="chart.html">
         <ons-page>
           <ons-toolbar>
             <div class="left">
@@ -173,11 +240,11 @@
               </ons-toolbar-button>
             </div>
             <div class="center">
-              About
+              Graphique
             </div>
           </ons-toolbar>
 
-          <ons-input id="testdate-input" type="date" name= "test" float>
+          
         </ons-page>
       </template>
     <script type="text/javascript" src="cordova.js"></script>
