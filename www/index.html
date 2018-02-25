@@ -138,7 +138,7 @@
               </ons-toolbar-button>
             </div>
             <div class="center">
-              <span>Settings </span> | <span id="bleName"></span> | <span id="theTime"></span>
+              <span>Settings </span> <span id="bleName" hidden="true"></span> | <span id="theTime"></span>
             </div>
           </ons-toolbar>
           <ons-progress-bar id="progressVal" value="0"></ons-progress-bar>
@@ -198,7 +198,7 @@
                   Graphique Mode
                 </label>
                 <label class="switch switch--material">
-                  <input type="checkbox" class="switch__input switch--material__input" input-id="graphState-1" id="graphState">
+                  <input type="checkbox" class="switch__input switch--material__input" input-id="graphState-1" id="chartState">
                   <div class="switch__toggle switch--material__toggle">
                     <div class="switch__handle switch--material__handle">
                     </div>
@@ -234,17 +234,63 @@
                         
                       </label>
                     </ons-list-item>
+                    <ons-list-item>
+                        <label for="graphState-1" class="right">
+                          Treshold High  [0:2047]
+                        </label>
+                        <label class="text-input">
+                            <ons-input type="text" name= "test" class="text-input" id="highState"></ons-input>
+                          
+                        </label>
+                      </ons-list-item>
+                      <ons-list-item>
+                          <label for="graphState-1" class="right">
+                            Treshold Low   [-2047:0]
+                          </label>
+                          <label class="text-input">
+                              <ons-input type="text" name= "test" class="text-input" id="lowState"></ons-input>
+                            
+                          </label>
+                        </ons-list-item>
+                        <ons-list-item>
+                            <label for="graphState-1" class="right">
+                              Hysteresys [0.31]
+                            </label>
+                            <label class="text-input">
+                                <ons-input type="text" name= "test" class="text-input" id="hystState"></ons-input>
+                              
+                            </label>
+                          </ons-list-item>
+                          <ons-list-item>
+                              <label for="graphState-1" class="right">
+                                Blootooth Mode
+                              </label>
+                              <label class="switch switch--material">
+                                <input type="checkbox" class="switch__input switch--material__input" input-id="graphState-1" id="blueState">
+                                <div class="switch__toggle switch--material__toggle">
+                                  <div class="switch__handle switch--material__handle">
+                                  </div>
+                                </div>
+                              </label>
+                            </ons-list-item>
+                          
               
           </ons-list>
-          <div class="toast toast--material">
-              <button id="infoButton" onclick="app.askInfosN()" class="toast__button toast--material__button">Infos</button>
-              <div class="toast__message toast--material__message"></div>
-              <button id="commandButton" onclick="app.askAllDatas()" class="toast__button toast--material__button">askAll</button>
-              <div class="toast__message toast--material__message"></div>
-              <button id="graphButton" class="toast__button toast--material__button"  onclick="app.modeDev()">dev</button>
-              <div class="toast__message toast--material__message"></div>
-              <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Exit</button>
-          </div>
+          <div class="button-bar" style="width:280px;">
+              <div class="button-bar__item">
+                <button class="button-bar__button"  onclick="app.askInfosN()">Infos</button>
+              </div>
+              <div class="button-bar__item">
+                <button class="button-bar__button" onclick="app.askAllDatas()" >askAll</button>
+              </div>
+              <div class="button-bar__item">
+                <button class="button-bar__button" onclick="app.modeDev()">Save</button>
+              </div>
+              <div class="button-bar__item">
+                  <button class="button-bar__button" onClick="app.disconnect()">Exit</button>
+                </div>
+            </div>
+          
         </ons-page>
         
       </template>

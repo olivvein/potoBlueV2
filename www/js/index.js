@@ -309,7 +309,7 @@ var app = {
         app.sendData(dataToSend);
     },
     askInfosRange: function() {
-        app.getFileList();
+        //app.getFileList();
         var infosList = document.getElementById('infosList');
         infosList.innerHTML = "";
         var min = 0;
@@ -321,8 +321,8 @@ var app = {
         theFileList = theFileList.sort(dynamicSort("from"));
 
         for (var jj = 0; jj < theFileList.length; jj++) {
-
-            if (theFileList[jj] == myDeviceName) {
+            console.log(theFileList[jj].name + " - " + myDeviceName)
+            if (theFileList[jj].name == myBle.name) {
                 var listItem4 = document.createElement('li'),
                     html9 = '<div class="list-item__center">From:<b>' + moment(dubToUnix(theMin)).format("DD/MM/YYYY") + '</b>' +
                     '&nbsp;|&nbsp;to: ' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY");
@@ -391,6 +391,7 @@ var app = {
             }
 
         };
+        //app.getFileList();
     },
     sendCommand: function(command) {
         lastIndex = 0;
@@ -420,7 +421,7 @@ var app = {
     },
     modeDev: function() {
         console.log("livecount is :" + livecountState.checked);
-        console.log("graphMode is :" + graphState.checked);
+        console.log("graphMode is :" + chartState.checked);
         console.log("the input date : " + dateState.value);
         console.log(dateState.value);
         var inputedDate = moment(dateState.value, "YYYY-MM-DD").format("DD/MM/YYYY");
@@ -456,15 +457,33 @@ var app = {
             var theCommand = "format";
             app.sendCommand(theCommand);
         }
-        if (graphState.checked == true) {
-            console.log("Sending Graph = " + graphState.checked);
-            var theCommand = "chart,1,35";
+        if (Number(chartState.checked) != Number(myBle.chartMode)) {
+            console.log("Sending Graph = " + chartState.checked);
+            var theCommand = "chart," + Number(chartState.checked) + ",35";
             requested = "graph";
             app.sendCommandG(theCommand);
         }
-        if (graphState.checked == false) {
-            console.log("Sending Graph = " + graphState.checked);
-            var theCommand = "chart,0,35";
+        if (Number(blueState.checked) != Number(myBle.bluetoothMode)) {
+            console.log("Sending BluetoothMode = " + blueState.checked);
+            var theCommand = "btMode," + Number(blueState.checked);
+            app.sendCommandG(theCommand);
+        }
+        if (highState.value != myBle.tresholdHigh) {
+            console.log("Sending High = " + highState.value);
+            var theCommand = "high," + highState.value;
+            console.log(theCommand);
+            app.sendCommand(theCommand);
+        }
+        if (lowState.value != myBle.tresholdLow) {
+            console.log("Sending High = " + lowState.value);
+            var theCommand = "low," + lowState.value;
+            console.log(theCommand);
+            app.sendCommand(theCommand);
+        }
+        if (hystState.value != myBle.hysteresis) {
+            console.log("Sending hyst = " + hystState.value);
+            var theCommand = "hyst," + hystState.value;
+            console.log(theCommand);
             app.sendCommand(theCommand);
         }
     },
@@ -737,7 +756,7 @@ var app = {
             });
             result.forEach(function(ll) {
                 //console.log(ll);
-                //console.log(ll[0] + " is : " + ll[1]);
+                console.log(ll[0] + " is : " + ll[1]);
                 //debugLog(ll);
                 if (ll[0] == "name") {
                     myBle.name = ll[1];
@@ -790,6 +809,38 @@ var app = {
                 }
                 if (ll[0] == "hysteresis") {
                     myBle.hysteresis = ll[1];
+                    if (theMode == "settings") {
+                        hystState.value = myBle.hysteresis;
+
+                    }
+                }
+                if (ll[0] == "thresholdHigh") {
+                    myBle.tresholdHigh = ll[1];
+                    if (theMode == "settings") {
+                        highState.value = myBle.tresholdHigh;
+
+                    }
+                }
+                if (ll[0] == "thresholdLow") {
+                    myBle.tresholdLow = ll[1];
+                    if (theMode == "settings") {
+                        lowState.value = myBle.tresholdLow;
+
+                    }
+                }
+                if (ll[0] == "chartMode") {
+                    myBle.chartMode = ll[1];
+                    if (theMode == "settings") {
+                        chartState.checked = Number(myBle.chartMode);
+
+                    }
+                }
+                if (ll[0] == "bluetoothMode") {
+                    myBle.bluetoothMode = ll[1];
+                    if (theMode == "settings") {
+                        blueState.checked = Number(myBle.bluetoothMode);
+
+                    }
                 }
                 if (ll[0] == "data") {
                     myBle.data = Number(ll[1]) * 8;
