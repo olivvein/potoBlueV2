@@ -109,13 +109,17 @@
               </ons-col>
           </ons-row>
 
+          <ul class="list" id="infosList">
+                
+            </ul>
+
           
           <div class="toast toast--material">
-            <button id="infoButton" onclick="app.askInfos()" class="toast__button toast--material__button">Infos</button>
+            <button id="infoButton" onclick="app.askInfos('0','99999999')" class="toast__button toast--material__button">Infos</button>
             <div class="toast__message toast--material__message"></div>
             <button id="commandButton" onclick="app.askAllDatas()" class="toast__button toast--material__button">askAll</button>
             <div class="toast__message toast--material__message"></div>
-            <button id="graphButton" class="toast__button toast--material__button">Graph</button>
+            <button id="graphButton" class="toast__button toast--material__button" onclick="app.askInfosRange()">Test</button>
             <div class="toast__message toast--material__message"></div>
             <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Quit</button>
         </div>

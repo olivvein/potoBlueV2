@@ -18,6 +18,33 @@
 /* jshint browser: true , devel: true*/
 'use strict';
 
+var theBiggestNumber = "14776335";
+
+function dubToUnix(dub) {
+    var unix = 0;
+    unix = (dub * 100000) + 1483228800000;
+    return unix;
+}
+
+function unixToDub(unix) {
+    var dub = 0;
+    dub = (unix - 1483228800000) / 100000;
+    return dub;
+}
+
+function dynamicSort(property) {
+    var sortOrder = 1;
+    if (property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+    return function(a, b) {
+        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        return result * sortOrder;
+    }
+}
+var timesInfos = [];
+var objD = {};
 var modal = document.querySelector('ons-modal');
 var myDeviceName = "";
 var theMode = "normal";
@@ -32,9 +59,12 @@ var myBle = {};
 myBle.data = buffLen;
 myBle.right = 0;
 myBle.left = 0;
+myBle.from = "0";
+myBle.to = "14776335";
 
 var dataFrom = "0";
 var dataTo = "0";
+var theFileList = [];
 
 function createFile(dirEntry, fileName, isAppend) {
     dirEntry.getFile(fileName, { create: true, exclusive: false }, function(fileEntry) {
@@ -134,7 +164,7 @@ var app = {
                 var content = document.getElementById('content');
                 var menu = document.getElementById('menu');
                 content.load(page).then(menu.close.bind(menu));
-                app.askInfos();
+                app.askInfos("0", "14776335");
             }
         } else {
             var content = document.getElementById('content');
@@ -170,12 +200,13 @@ var app = {
                 var theFilename = filename + ".txt"
                 createFile(subDirEntry, theFilename, isAppend);
             }, console.log);
-        }, debugLog("Fs done"));
+        }, app.getFileList);
     },
     getFileList: function() {
         debugLog("Requesting File System");
         window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
             console.log('file system open: ' + dirEntry.name);
+            theFileList = [];
             dirEntry.getDirectory('potoBlueV2', { create: true }, function(subDirEntry) {
                 console.log("Subentry");
                 var reader = subDirEntry.createReader();
@@ -189,6 +220,11 @@ var app = {
                             var to = fiVal[2];
                             to = to.substring(0, to.length - 4);
                             console.log(name + " - " + from + " - " + to);
+                            var obj = {};
+                            obj.name = name;
+                            obj.from = Number(from);
+                            obj.to = Number(to);
+                            theFileList.push(obj);
                         });
                     },
                     function(err) {
@@ -222,7 +258,7 @@ var app = {
                 myDevice = deviceId;
                 myDeviceName = nameT;
                 app.load("action.html");
-                app.askInfos();
+                app.askInfos("0", "14776335");
             };
         ble.connect(deviceId, onConnect, app.onError);
     },
@@ -231,25 +267,100 @@ var app = {
         ble.disconnect(deviceId, app.loadMainPage, app.onError);
         window.plugins.insomnia.allowSleepAgain();
     },
-    askInfos: function() {
+    askInfos: function(from, to) {
+        console.log("asking infos :", from, to);
         lastIndex = 0;
         buffLen = 500;
         requested = "infos";
         dataBuffer = new Uint8Array(buffLen);
-        var dataToSend = "*" + toiMemeTuSais + ",infos$";
+        var dataToSend = "*" + toiMemeTuSais + ",infos," + from + "," + to + "$";
         myBle.right = 0;
         myBle.left = 0;
+        myBle.from = from;
+        myBle.to = to;
         app.sendData(dataToSend);
     },
     askInfosRange: function() {
-        lastIndex = 0;
-        buffLen = 500;
-        requested = "infos";
-        dataBuffer = new Uint8Array(buffLen);
-        var dataToSend = "*" + toiMemeTuSais + ",infos" + dataFrom + "," + dataTo + "$";
-        myBle.right = 0;
-        myBle.left = 0;
-        app.sendData(dataToSend);
+        app.getFileList();
+        var infosList = document.getElementById('infosList');
+        infosList.innerHTML = "";
+        var min = 0;
+        var max = 14776335;
+        var theMin = 0;
+        var theMax = 14776335;
+        var theWin = [];
+        //theWin.push();
+        theFileList = theFileList.sort(dynamicSort("from"));
+
+        for (var jj = 0; jj < theFileList.length; jj++) {
+
+
+            var listItem4 = document.createElement('li'),
+                html9 = '<div class="list-item__center">From:<b>' + moment(dubToUnix(theMin)).format("DD/MM/YYYY") + '</b>' +
+                '&nbsp;|&nbsp;to: ' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY");
+            listItem4.innerHTML = html9;
+            listItem4.class = "list-item list-item--tappable";
+
+            listItem4.addEventListener("click", function(e) {
+                var iiner = e.target.innerHTML;
+
+                var fromD = iiner.substring(iiner.indexOf(":<b>") + 4);
+                fromD = fromD.substring(0, fromD.indexOf("</b>"));
+
+                var toD = iiner.substring(iiner.indexOf("to: ") + 4);
+                var fromDate = moment(dubToUnix(fromD)).format("DD/MM/YYYY");
+                var toDate = moment(dubToUnix(toD)).format("DD/MM/YYYY");
+                console.log("From: " + fromDate);
+                console.log("To: " + toDate);
+                app.askInfos(String(fromD), String(toD));
+            }, false);
+            infosList.appendChild(listItem4);
+
+            theMin = theFileList[jj].to;
+
+            console.log(theFileList[jj].from + " - " + theFileList[jj].to);
+            var listItem5 = document.createElement('li'),
+                html9 = '<div class="list-item__center">You GOT From:<b>' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY") + '</b>' +
+                '&nbsp;|&nbsp;to: ' + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY");
+            listItem5.innerHTML = html9;
+            listItem5.class = "list-item list-item--tappable";
+
+            listItem5.addEventListener("click", function(e) {
+                var iiner = e.target.innerHTML;
+
+                var fromD = iiner.substring(iiner.indexOf(":<b>") + 4);
+                fromD = fromD.substring(0, fromD.indexOf("</b>"));
+
+                var toD = iiner.substring(iiner.indexOf("to: ") + 4);
+                var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY"));
+                var toDate = unixToDub(moment(toD, "DD/MM/YYYY"));
+
+                app.askInfos(String(fromDate), String(toDate));
+            }, false);
+            infosList.appendChild(listItem5);
+
+            if (jj == theFileList.length - 1) {
+                var listItem1 = document.createElement('li'),
+                    html1 = '<div class="list-item__center">From:<b>' + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY") + '</b>' +
+                    '&nbsp;|&nbsp;to: ' + moment(dubToUnix(14776335)).format("DD/MM/YYYY") + '</div>';
+                listItem1.innerHTML = html1;
+                listItem1.class = "list-item list-item--tappable";
+                listItem1.addEventListener("click", function(e) {
+                    var iiner = e.target.innerHTML;
+
+                    var fromD = iiner.substring(iiner.indexOf(":<b>") + 4);
+                    fromD = fromD.substring(0, fromD.indexOf("</b>"));
+                    console.log(fromD);
+
+                    var toD = iiner.substring(iiner.indexOf("to: ") + 4);
+                    var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY"));
+                    var toDate = unixToDub(moment(toD, "DD/MM/YYYY"));
+
+                    app.askInfos(String(fromDate), String(toDate));
+                }, false);
+                infosList.appendChild(listItem1);
+            }
+        };
     },
     sendCommand: function(command) {
         lastIndex = 0;
@@ -264,9 +375,9 @@ var app = {
         buffLen = myBle.data;
         dataBuffer = new Uint8Array(buffLen);
         requested = "sendAll2";
-        console.log("Asking All Datas...");
+        //console.log("Asking All Datas...");
         modal.show();
-        var dataToSend = "*" + toiMemeTuSais + ",data$";
+        var dataToSend = "*" + toiMemeTuSais + ",data," + myBle.from + "," + myBle.to + "$";
         app.sendData(dataToSend);
     },
     modeDev: function() {
@@ -307,9 +418,9 @@ var app = {
         alert("ERROR: " + JSON.stringify(reason)); // real apps should use notification.alert
     },
     sendData: function(dataToSend) { // send data to Arduino
-        console.log("Sending data :");
+        //console.log("Sending data :");
         var success = function() {
-            console.log("success");
+            //console.log("success");
         };
         var failure = function() {
             console.log("Failed writing data to the bluefruit le");
@@ -319,12 +430,12 @@ var app = {
         console.log("to : " + myDevice);
         var deviceId = myDevice;
         if (messagee.length >= 18) {
-            console.log("Message bigger than 18");
+            //console.log("Message bigger than 18");
             var arraYofStringss = [];
             arraYofStringss = messagee.split(",");
-            console.log(arraYofStringss);
-            console.log(arraYofStringss.length);
-            console.log(arraYofStringss[0]);
+            //console.log(arraYofStringss);
+            //console.log(arraYofStringss.length);
+            //console.log(arraYofStringss[0]);
             var mleng = arraYofStringss.length;
             var ml = 0;
             for (var i = 0; i < mleng; i++) {
@@ -332,11 +443,11 @@ var app = {
                 if (i != mleng - 1) {
                     mm = mm + ',';
                 }
-                console.log("will send :");
-                console.log(mm);
+                //console.log("will send :");
+                //console.log(mm);
                 var data = stringToBytes(mm);
                 if (app.writeWithoutResponse) {
-                    console.log("Write Without response ...");
+                    //console.log("Write Without response ...");
                     ble.writeWithoutResponse(
                         deviceId,
                         bluefruit.serviceUUID,
@@ -344,7 +455,7 @@ var app = {
                         data, success, failure
                     );
                 } else {
-                    console.log("Write...");
+                    //console.log("Write...");
                     ble.write(
                         deviceId,
                         bluefruit.serviceUUID,
@@ -354,10 +465,10 @@ var app = {
                 }
             };
         } else {
-            console.log("message smaller than 16");
+            //console.log("message smaller than 16");
             var data = stringToBytes(messagee);
             if (app.writeWithoutResponse) {
-                console.log("Write Without response ...");
+                //console.log("Write Without response ...");
                 ble.writeWithoutResponse(
                     deviceId,
                     bluefruit.serviceUUID,
@@ -365,7 +476,7 @@ var app = {
                     data, success, failure
                 );
             } else {
-                console.log("Write...");
+                //console.log("Write...");
                 ble.write(
                     deviceId,
                     bluefruit.serviceUUID,
@@ -380,9 +491,9 @@ var app = {
         dataBuffer.set(temp, lastIndex);
         if (dataBuffer.indexOf(35) != -1) { //Si caractere de fin : #
             lastIndex = temp.length + lastIndex;
-            console.log("lastIndex :" + lastIndex);
+            //console.log("lastIndex :" + lastIndex);
             //debugLog("end of transmission de ouf");
-            console.log("end of transmission de ouf");
+            //console.log("end of transmission de ouf");
             app.prepareData();
             lastIndex = 0;
         }
@@ -404,7 +515,7 @@ var app = {
         resultDiv.innerHTML = resultDiv.innerHTML + "Debut Prepare <br/>";
         resultDiv.scrollTop = resultDiv.scrollHeight;
         */
-        console.log("Debut Prepare");
+        //console.log("Debut Prepare");
 
         var stringArray = Array.prototype.slice.call(dataBuffer).map(String);
         var myData = "";
@@ -622,6 +733,8 @@ var app = {
             });
             modal.hide();
             app.requestAndroidFS(myBle.name + "_" + firstTime + "_" + lastTime);
+
+
         }
         //resultDiv.innerHTML = resultDiv.innerHTML + "The data: <br/>";
         //resultDiv.innerHTML = resultDiv.innerHTML + myData;
