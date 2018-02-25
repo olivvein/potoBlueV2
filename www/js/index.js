@@ -18,6 +18,17 @@
 /* jshint browser: true , devel: true*/
 'use strict';
 
+
+var x = 0;
+var lasty = 0;
+var lastyk = 0;
+var lastyl = 0;
+var lastym = 0;
+var posX;
+var posY;
+var theMin = 999;
+var theMax = 0;
+var canvas;
 var theBiggestNumber = "14776335";
 
 function dubToUnix(dub) {
@@ -164,12 +175,18 @@ var app = {
                 var content = document.getElementById('content');
                 var menu = document.getElementById('menu');
                 content.load(page).then(menu.close.bind(menu));
-                app.askInfos("0", "14776335");
+                app.askInfosN();
             }
         } else {
+
             var content = document.getElementById('content');
             var menu = document.getElementById('menu');
             content.load(page).then(menu.close.bind(menu));
+            if (page == "chart.html") {
+                theMode = "chart";
+                canvas = document.getElementById("myCanvas");
+                canvas.width = window.innerWidth;
+            }
         }
 
     },
@@ -258,7 +275,7 @@ var app = {
                 myDevice = deviceId;
                 myDeviceName = nameT;
                 app.load("action.html");
-                app.askInfos("0", "14776335");
+                app.askInfosN();
             };
         ble.connect(deviceId, onConnect, app.onError);
     },
@@ -280,6 +297,17 @@ var app = {
         myBle.to = to;
         app.sendData(dataToSend);
     },
+    askInfosN: function() {
+        console.log("asking infos :");
+        lastIndex = 0;
+        buffLen = 500;
+        requested = "infos";
+        dataBuffer = new Uint8Array(buffLen);
+        var dataToSend = "*" + toiMemeTuSais + ",infos$";
+        myBle.right = 0;
+        myBle.left = 0;
+        app.sendData(dataToSend);
+    },
     askInfosRange: function() {
         app.getFileList();
         var infosList = document.getElementById('infosList');
@@ -294,63 +322,42 @@ var app = {
 
         for (var jj = 0; jj < theFileList.length; jj++) {
 
+            if (theFileList[jj] == myDeviceName) {
+                var listItem4 = document.createElement('li'),
+                    html9 = '<div class="list-item__center">From:<b>' + moment(dubToUnix(theMin)).format("DD/MM/YYYY") + '</b>' +
+                    '&nbsp;|&nbsp;to: ' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY");
+                listItem4.innerHTML = html9;
+                listItem4.class = "list-item list-item--tappable";
 
-            var listItem4 = document.createElement('li'),
-                html9 = '<div class="list-item__center">From:<b>' + moment(dubToUnix(theMin)).format("DD/MM/YYYY") + '</b>' +
-                '&nbsp;|&nbsp;to: ' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY");
-            listItem4.innerHTML = html9;
-            listItem4.class = "list-item list-item--tappable";
-
-            listItem4.addEventListener("click", function(e) {
-                var iiner = e.target.innerHTML;
-
-                var fromD = iiner.substring(iiner.indexOf(":<b>") + 4);
-                fromD = fromD.substring(0, fromD.indexOf("</b>"));
-
-                var toD = iiner.substring(iiner.indexOf("to: ") + 4);
-                var fromDate = moment(dubToUnix(fromD)).format("DD/MM/YYYY");
-                var toDate = moment(dubToUnix(toD)).format("DD/MM/YYYY");
-                console.log("From: " + fromDate);
-                console.log("To: " + toDate);
-                app.askInfos(String(fromD), String(toD));
-            }, false);
-            infosList.appendChild(listItem4);
-
-            theMin = theFileList[jj].to;
-
-            console.log(theFileList[jj].from + " - " + theFileList[jj].to);
-            var listItem5 = document.createElement('li'),
-                html9 = '<div class="list-item__center">You GOT From:<b>' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY") + '</b>' +
-                '&nbsp;|&nbsp;to: ' + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY");
-            listItem5.innerHTML = html9;
-            listItem5.class = "list-item list-item--tappable";
-
-            listItem5.addEventListener("click", function(e) {
-                var iiner = e.target.innerHTML;
-
-                var fromD = iiner.substring(iiner.indexOf(":<b>") + 4);
-                fromD = fromD.substring(0, fromD.indexOf("</b>"));
-
-                var toD = iiner.substring(iiner.indexOf("to: ") + 4);
-                var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY"));
-                var toDate = unixToDub(moment(toD, "DD/MM/YYYY"));
-
-                app.askInfos(String(fromDate), String(toDate));
-            }, false);
-            infosList.appendChild(listItem5);
-
-            if (jj == theFileList.length - 1) {
-                var listItem1 = document.createElement('li'),
-                    html1 = '<div class="list-item__center">From:<b>' + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY") + '</b>' +
-                    '&nbsp;|&nbsp;to: ' + moment(dubToUnix(14776335)).format("DD/MM/YYYY") + '</div>';
-                listItem1.innerHTML = html1;
-                listItem1.class = "list-item list-item--tappable";
-                listItem1.addEventListener("click", function(e) {
+                listItem4.addEventListener("click", function(e) {
                     var iiner = e.target.innerHTML;
 
                     var fromD = iiner.substring(iiner.indexOf(":<b>") + 4);
                     fromD = fromD.substring(0, fromD.indexOf("</b>"));
-                    console.log(fromD);
+
+                    var toD = iiner.substring(iiner.indexOf("to: ") + 4);
+                    var fromDate = moment(dubToUnix(fromD)).format("DD/MM/YYYY");
+                    var toDate = moment(dubToUnix(toD)).format("DD/MM/YYYY");
+                    console.log("From: " + fromDate);
+                    console.log("To: " + toDate);
+                    app.askInfos(String(fromD), String(toD));
+                }, false);
+                infosList.appendChild(listItem4);
+
+                theMin = theFileList[jj].to;
+
+                console.log(theFileList[jj].from + " - " + theFileList[jj].to);
+                var listItem5 = document.createElement('li'),
+                    html9 = '<div class="list-item__center">You GOT From:<b>' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY") + '</b>' +
+                    '&nbsp;|&nbsp;to: ' + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY");
+                listItem5.innerHTML = html9;
+                listItem5.class = "list-item list-item--tappable";
+
+                listItem5.addEventListener("click", function(e) {
+                    var iiner = e.target.innerHTML;
+
+                    var fromD = iiner.substring(iiner.indexOf(":<b>") + 4);
+                    fromD = fromD.substring(0, fromD.indexOf("</b>"));
 
                     var toD = iiner.substring(iiner.indexOf("to: ") + 4);
                     var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY"));
@@ -358,14 +365,45 @@ var app = {
 
                     app.askInfos(String(fromDate), String(toDate));
                 }, false);
-                infosList.appendChild(listItem1);
+                infosList.appendChild(listItem5);
+
+                if (jj == theFileList.length - 1) {
+                    var listItem1 = document.createElement('li'),
+                        html1 = '<div class="list-item__center">From:<b>' + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY") + '</b>' +
+                        '&nbsp;|&nbsp;to: ' + moment(dubToUnix(14776335)).format("DD/MM/YYYY") + '</div>';
+                    listItem1.innerHTML = html1;
+                    listItem1.class = "list-item list-item--tappable";
+                    listItem1.addEventListener("click", function(e) {
+                        var iiner = e.target.innerHTML;
+
+                        var fromD = iiner.substring(iiner.indexOf(":<b>") + 4);
+                        fromD = fromD.substring(0, fromD.indexOf("</b>"));
+                        console.log(fromD);
+
+                        var toD = iiner.substring(iiner.indexOf("to: ") + 4);
+                        var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY"));
+                        var toDate = unixToDub(moment(toD, "DD/MM/YYYY"));
+
+                        app.askInfos(String(fromDate), String(toDate));
+                    }, false);
+                    infosList.appendChild(listItem1);
+                }
             }
+
         };
     },
     sendCommand: function(command) {
         lastIndex = 0;
         buffLen = 500;
         requested = "infos";
+        dataBuffer = new Uint8Array(buffLen);
+        var dataToSend = "*" + toiMemeTuSais + "," + command + "$";
+        app.sendData(dataToSend);
+    },
+    sendCommandG: function(command) {
+        lastIndex = 0;
+        buffLen = 500;
+        requested = "graph";
         dataBuffer = new Uint8Array(buffLen);
         var dataToSend = "*" + toiMemeTuSais + "," + command + "$";
         app.sendData(dataToSend);
@@ -411,6 +449,22 @@ var app = {
         if (nameState.value != myBle.name) {
             console.log("Sending Name = " + nameState.value);
             var theCommand = "setName," + nameState.value;
+            app.sendCommand(theCommand);
+        }
+        if (formatState.checked == true) {
+            console.log("Sending Format = ");
+            var theCommand = "format";
+            app.sendCommand(theCommand);
+        }
+        if (graphState.checked == true) {
+            console.log("Sending Graph = " + graphState.checked);
+            var theCommand = "chart,1,35";
+            requested = "graph";
+            app.sendCommandG(theCommand);
+        }
+        if (graphState.checked == false) {
+            console.log("Sending Graph = " + graphState.checked);
+            var theCommand = "chart,0,35";
             app.sendCommand(theCommand);
         }
     },
@@ -486,29 +540,152 @@ var app = {
             }
         }
     },
+    sizeCanvas: function() {
+        canvas = document.getElementById("myCanvas");
+        canvas.width = window.innerWidth;
+    },
     onData: function(data) {
-        var temp = new Uint8Array(data);
-        dataBuffer.set(temp, lastIndex);
-        if (dataBuffer.indexOf(35) != -1) { //Si caractere de fin : #
-            lastIndex = temp.length + lastIndex;
-            //console.log("lastIndex :" + lastIndex);
-            //debugLog("end of transmission de ouf");
-            //console.log("end of transmission de ouf");
-            app.prepareData();
-            lastIndex = 0;
-        }
-        if (requested != "infos") {
 
-            var progressVal = document.getElementById("progressVal");
-            progressVal.value = 100 * (lastIndex / myBle.data);
-            /*var percent = document.getElementById("percent");
-            percent.innerHTML = Math.round(100 * (lastIndex / myBle.data)) + "%";
-            */
+        if (requested == "graph") {
+
+            canvas = document.getElementById("myCanvas");
+            if (theMode == "chart" && canvas != undefined) {
+                var rangeMin = document.getElementById('zoomViewMin');
+                var rangeMax = document.getElementById('zoomViewMax');
+
+                var widthC = canvas.width;
+                var ctx = canvas.getContext("2d");
+                //canvas.width = window.innerWidth;
+                //canvas.height = window.innerHeight;
+
+                var temp = new Uint8Array(data);
+                dataBuffer.set(temp, lastIndex);
+                lastIndex = temp.length + lastIndex;
+                if (dataBuffer.indexOf(10) != -1) { //Si caractere de fin : #
+                    var myDatas = "";
+                    //console.log("eol");
+                    //console.log(dataBuffer.length);
+                    if (dataBuffer.length < buffLen + 1) {
+                        dataBuffer.forEach(function(tt) {
+                            //console.log(tt);
+                            if (tt != 0) {
+                                myDatas = myDatas + String.fromCharCode(tt);
+                            }
+                        });
+                        //console.log(myDatas);
+                        var miDa = myDatas.split(",");
+                        //console.log(miDa.length);
+                        //console.log(miDa[2]);
+
+
+                        //console.log(theMin + " - " + theMax);
+                        rangeMin = document.getElementById('zoomViewMin');
+                        rangeMax = document.getElementById('zoomViewMax');
+
+
+
+                        var mapToNumber = function(x, in_min, in_max, out_min, out_max) {
+                            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+                        }
+
+                        var formulaSimple = function(chiffre) {
+                            return 200 - mapToNumber(Number(chiffre), 200 - rangeMin.value * 20, rangeMax.value * 20, 0, 200);
+                            //return 200 - Number(chiffre) / 4;
+                        }
+
+                        x = x + 1;
+                        if (x >= widthC) {
+                            x = 0;
+                            ctx.beginPath();
+                            ctx.rect(0, 0, widthC, 200);
+                            ctx.fillStyle = "white";
+                            ctx.fill();
+                        }
+                        ctx.beginPath();
+                        ctx.moveTo(x - 1, formulaSimple(lasty));
+                        ctx.lineTo(x, formulaSimple(miDa[0]));
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = "#ff00ff";
+                        ctx.stroke();
+                        lasty = Number(miDa[0]);
+                        //console.log(miDa[0] + "," + miDa[1] + "," + miDa[2] + "," + miDa[3]);
+
+
+                        ctx.beginPath();
+                        ctx.moveTo(x - 1, formulaSimple(lastyk));
+                        ctx.lineTo(x, formulaSimple(miDa[1]));
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = "#00ff00";
+                        ctx.stroke();
+                        lastyk = Number(miDa[1]);
+
+
+
+
+
+                        ctx.beginPath();
+                        ctx.moveTo(x - 1, formulaSimple(lastyl));
+                        ctx.lineTo(x, formulaSimple(miDa[2]));
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = "#0000ff";
+                        ctx.stroke();
+                        lastyl = Number(miDa[2]);
+
+
+                        miDa[3] = miDa[3].substring(0, miDa[3].length - 2);
+
+                        ctx.beginPath();
+                        ctx.moveTo(x - 1, formulaSimple(lastym));
+                        ctx.lineTo(x, formulaSimple(miDa[3]));
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = "#ff0000";
+                        ctx.stroke();
+                        lastym = Number(miDa[3]);
+
+
+                    }
+
+                    myDatas = "";
+                    dataBuffer = new Uint8Array(buffLen);
+                    lastIndex = 0;
+                }
+
+            }
+
+
+
+        } else {
+
+
+            var temp = new Uint8Array(data);
+            dataBuffer.set(temp, lastIndex);
+            if (dataBuffer.indexOf(35) != -1) { //Si caractere de fin : #
+                lastIndex = temp.length + lastIndex;
+                //console.log("lastIndex :" + lastIndex);
+                //debugLog("end of transmission de ouf");
+                //console.log("end of transmission de ouf");
+                app.prepareData();
+                lastIndex = 0;
+            }
+            if (requested != "infos") {
+
+                var progressVal = document.getElementById("progressVal");
+                progressVal.value = 100 * (lastIndex / myBle.data);
+                /*var percent = document.getElementById("percent");
+                percent.innerHTML = Math.round(100 * (lastIndex / myBle.data)) + "%";
+                */
+            }
+            if (lastIndex > buffLen) {
+                console.log("too big" + lastIndex);
+            }
+            lastIndex = temp.length + lastIndex;
+
+
+
         }
-        if (lastIndex > buffLen) {
-            console.log("too big" + lastIndex);
-        }
-        lastIndex = temp.length + lastIndex;
+
+
+
     },
     prepareData: function(event) { // save data to text file
         /*
