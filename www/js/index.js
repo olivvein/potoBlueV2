@@ -30,17 +30,20 @@ var theMin = 999;
 var theMax = 0;
 var canvas;
 var theBiggestNumber = "14776335";
+var password = "sam261083";
+var myPassword = "";
+var httpd = null;
 
 function dubToUnix(dub) {
     var unix = 0;
     unix = (dub * 100000) + 1483228800000;
-    return unix;
+    return Number(unix);
 }
 
 function unixToDub(unix) {
     var dub = 0;
     dub = (unix - 1483228800000) / 100000;
-    return dub;
+    return Number(dub);
 }
 
 function dynamicSort(property) {
@@ -76,6 +79,45 @@ myBle.to = "14776335";
 var dataFrom = "0";
 var dataTo = "0";
 var theFileList = [];
+
+
+function startServer(wwwroot) {
+    if (httpd) {
+        httpd.getURL(function(url) {
+            if (url.length > 0) {
+                document.getElementById('url').innerHTML = "server is up: <a href='" + url + "' target='_blank'>" + url + "</a>";
+            } else {
+                httpd.startServer({
+                    'www_root': wwwroot,
+                    'port': 8080
+                }, function(url) {
+                    //document.getElementById('url').innerHTML = "server is started: <a href='" + url + "' target='_blank'>" + url + "</a>";
+                    updateStatus();
+                }, function(error) {
+                    document.getElementById('url').innerHTML = 'failed to start server: ' + error;
+                });
+            }
+
+        }, function() {});
+    } else {
+        console.log('CorHttpd plugin not available/ready for start.');
+    }
+}
+
+function stopServer() {
+    if (httpd) {
+        httpd.stopServer(function() {
+            //document.getElementById('url').innerHTML = 'server is stopped.';
+            updateStatus();
+        }, function(error) {
+            document.getElementById('url').innerHTML = 'failed to stop server' + error;
+        });
+    } else {
+        console.log('CorHttpd plugin not available/ready.');
+    }
+}
+
+
 
 function createFile(dirEntry, fileName, isAppend) {
     dirEntry.getFile(fileName, { create: true, exclusive: false }, function(fileEntry) {
@@ -196,8 +238,25 @@ var app = {
         app.refreshDeviceList();
     },
     onDeviceReady: function() {
+        httpd = (cordova && cordova.plugins && cordova.plugins.CorHttpd) ? cordova.plugins.CorHttpd : null;
+        startServer("/");
         app.refreshDeviceList();
         app.getFileList();
+        app.getFilePassword();
+    },
+    thePassword: function() {
+        if (myPassword != password) {
+            var modal1 = document.getElementById('modal1');
+            modal1.show();
+        }
+    },
+    checkPassword: function() {
+        var modal1 = document.getElementById('modal1');
+        console.log("Checking password : " + passwordV.value + " vs :" + password);
+        if (passwordV.value == password) {
+            console.log("ok");
+            modal1.hide();
+        }
     },
     refreshDeviceList: function() {
         console.log("debut refresh");
@@ -213,6 +272,17 @@ var app = {
         window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
             console.log('file system open: ' + dirEntry.name);
             dirEntry.getDirectory('potoBlueV2', { create: true }, function(subDirEntry) {
+                var isAppend = true;
+                var theFilename = filename + ".txt"
+                createFile(subDirEntry, theFilename, isAppend);
+            }, console.log);
+        }, app.getFileList);
+    },
+    createPassword: function(filename) {
+        debugLog("Requesting File System");
+        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
+            console.log('file system open: ' + dirEntry.name);
+            dirEntry.getDirectory('potoBlueV2pass', { create: true }, function(subDirEntry) {
                 var isAppend = true;
                 var theFilename = filename + ".txt"
                 createFile(subDirEntry, theFilename, isAppend);
@@ -242,6 +312,31 @@ var app = {
                             obj.from = Number(from);
                             obj.to = Number(to);
                             theFileList.push(obj);
+                        });
+                    },
+                    function(err) {
+                        console.log(err);
+                    }
+                );
+
+            }, console.log);
+        }, debugLog("Fs done"));
+    },
+    getFilePassword: function() {
+        debugLog("Requesting File System");
+        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
+            console.log('file system open: ' + dirEntry.name);
+            theFileList = [];
+            dirEntry.getDirectory('potoBlueV2pass', { create: true }, function(subDirEntry) {
+                console.log("Subentry");
+                var reader = subDirEntry.createReader();
+                reader.readEntries(
+                    function(entries) {
+                        entries.forEach(function(ent) {
+                            var file = ent.fullPath.split("/")[2];
+                            console.log(file);
+                            myPassword = file;
+                            app.thePassword();
                         });
                     },
                     function(err) {
@@ -314,8 +409,8 @@ var app = {
         infosList.innerHTML = "";
         var min = 0;
         var max = 14776335;
-        var theMin = 0;
-        var theMax = 14776335;
+        var theMin = myBle.dataMin;
+        var theMax = myBle.dataMax;
         var theWin = [];
         //theWin.push();
         theFileList = theFileList.sort(dynamicSort("from"));
@@ -324,10 +419,11 @@ var app = {
             console.log(theFileList[jj].name + " - " + myDeviceName)
             if (theFileList[jj].name == myBle.name) {
                 var listItem4 = document.createElement('li'),
-                    html9 = '<div class="list-item__center">From:<b>' + moment(dubToUnix(theMin)).format("DD/MM/YYYY") + '</b>' +
-                    '&nbsp;|&nbsp;to: ' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY");
+                    html9 = '<div class="list-item__center">De:<b>' + moment(dubToUnix(theMin)).format("DD/MM/YYYY hh:mm:ss") + '</b>' +
+                    '&nbsp;|&nbsp;à: ' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY hh:mm:ss");
                 listItem4.innerHTML = html9;
                 listItem4.class = "list-item list-item--tappable";
+                console.log("1:  " + moment(dubToUnix(theMin)).format("DD/MM/YYYY hh:mm:ss") + " - " + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY hh:mm:ss"));
 
                 listItem4.addEventListener("click", function(e) {
                     var iiner = e.target.innerHTML;
@@ -335,54 +431,66 @@ var app = {
                     var fromD = iiner.substring(iiner.indexOf(":<b>") + 4);
                     fromD = fromD.substring(0, fromD.indexOf("</b>"));
 
-                    var toD = iiner.substring(iiner.indexOf("to: ") + 4);
-                    var fromDate = moment(dubToUnix(fromD)).format("DD/MM/YYYY");
-                    var toDate = moment(dubToUnix(toD)).format("DD/MM/YYYY");
+                    var toD = iiner.substring(iiner.indexOf("à: ") + 3);
+                    var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY hh:mm:ss"));
+                    var toDate = unixToDub(moment(toD, "DD/MM/YYYY hh:mm:ss"));
                     console.log("From: " + fromDate);
                     console.log("To: " + toDate);
-                    app.askInfos(String(fromD), String(toD));
+                    app.askInfos(String(fromDate), String(toDate));
                 }, false);
                 infosList.appendChild(listItem4);
 
                 theMin = theFileList[jj].to;
+                console.log("Debut debug : ");
+                var nnkk = Number(theFileList[jj].to) - Number(432);
+                console.log(theFileList[jj].from + " - " + nnkk);
+                console.log(moment(dubToUnix(theFileList[jj].from)) + " - " + moment(dubToUnix(nnkk)));
+                var tiF = moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY hh:mm:ss");
+                var tiT = moment(dubToUnix(nnkk)).format("DD/MM/YYYY hh:mm:ss");
+                console.log(tiF + " - " + tiT);
+                var theDDd = Number(unixToDub(moment(tiT, "DD/MM/YYYY hh:mm:ss")));
+                console.log(unixToDub(moment(tiF, "DD/MM/YYYY hh:mm:ss")) + " - " + theDDd);
 
-                console.log(theFileList[jj].from + " - " + theFileList[jj].to);
                 var listItem5 = document.createElement('li'),
-                    html9 = '<div class="list-item__center">You GOT From:<b>' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY") + '</b>' +
-                    '&nbsp;|&nbsp;to: ' + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY");
-                listItem5.innerHTML = html9;
+                    html91 = '<div class="list-item__center">Vous avez depuis :<b>' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY hh:mm:ss") + '</b>' +
+                    "&nbsp;|&nbsp;jusqu'à: " + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY hh:mm:ss");
+                listItem5.innerHTML = html91;
                 listItem5.class = "list-item list-item--tappable";
-
+                console.log("2:  " + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY hh:mm:ss") + " - " + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY hh:mm:ss"));
+                //console.log(theFileList[jj].to);
                 listItem5.addEventListener("click", function(e) {
                     var iiner = e.target.innerHTML;
-
                     var fromD = iiner.substring(iiner.indexOf(":<b>") + 4);
                     fromD = fromD.substring(0, fromD.indexOf("</b>"));
 
-                    var toD = iiner.substring(iiner.indexOf("to: ") + 4);
-                    var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY"));
-                    var toDate = unixToDub(moment(toD, "DD/MM/YYYY"));
-
+                    var toD = iiner.substring(iiner.indexOf("à: ") + 3);
+                    var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY hh:mm:ss"));
+                    var toDate = unixToDub(moment(toD, "DD/MM/YYYY hh:mm:ss").add(13, "h"));
+                    console.log(toDate);
                     app.askInfos(String(fromDate), String(toDate));
                 }, false);
                 infosList.appendChild(listItem5);
-
+                //console.log(jj);
+                //console.log(theFileList.length - 1);
                 if (jj == theFileList.length - 1) {
+                    //console.log("should happend .......");
                     var listItem1 = document.createElement('li'),
-                        html1 = '<div class="list-item__center">From:<b>' + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY") + '</b>' +
-                        '&nbsp;|&nbsp;to: ' + moment(dubToUnix(14776335)).format("DD/MM/YYYY") + '</div>';
+                        html1 = '<div class="list-item__center">De :<b>' + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY hh:mm:ss") + '</b>' +
+                        '&nbsp;|&nbsp;à: ' + moment(dubToUnix(theMax)).format("DD/MM/YYYY hh:mm:ss") + '</div>';
                     listItem1.innerHTML = html1;
                     listItem1.class = "list-item list-item--tappable";
+                    //console.log("3:  " + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY hh:mm:ss") + " - " + moment(dubToUnix(14776335)).format("DD/MM/YYYY hh:mm:ss"));
+
                     listItem1.addEventListener("click", function(e) {
                         var iiner = e.target.innerHTML;
 
                         var fromD = iiner.substring(iiner.indexOf(":<b>") + 4);
                         fromD = fromD.substring(0, fromD.indexOf("</b>"));
-                        console.log(fromD);
+                        //console.log(fromD);
 
-                        var toD = iiner.substring(iiner.indexOf("to: ") + 4);
-                        var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY"));
-                        var toDate = unixToDub(moment(toD, "DD/MM/YYYY"));
+                        var toD = iiner.substring(iiner.indexOf("à: ") + 3);
+                        var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY hh:mm:ss"));
+                        var toDate = unixToDub(moment(toD, "DD/MM/YYYY hh:mm:ss"));
 
                         app.askInfos(String(fromDate), String(toDate));
                     }, false);
@@ -466,7 +574,7 @@ var app = {
         if (Number(blueState.checked) != Number(myBle.bluetoothMode)) {
             console.log("Sending BluetoothMode = " + blueState.checked);
             var theCommand = "btMode," + Number(blueState.checked);
-            app.sendCommandG(theCommand);
+            app.sendCommand(theCommand);
         }
         if (highState.value != myBle.tresholdHigh) {
             console.log("Sending High = " + highState.value);
@@ -766,6 +874,31 @@ var app = {
                         nameState.value = myBle.name;
                     }
                 }
+                if (ll[0] == "firmware") {
+                    myBle.firmware = ll[1];
+                }
+                if (ll[0] == "dataCorrupted") {
+                    myBle.dataCorrupted = ll[1];
+                }
+                if (ll[0] == "diagPir") {
+                    myBle.diagPir = ll[1];
+                }
+                if (ll[0] == "diagFlash") {
+                    myBle.diagFlash = ll[1];
+                }
+                if (ll[0] == "dataMin") {
+                    myBle.dataMin = ll[1];
+                    if (theMode == "action") {
+                        datasRange.innerHTML = moment(dubToUnix(myBle.dataMin)).format("DD/MM/YYYY hh:mm:ss") + " - " + moment(dubToUnix(myBle.dataMax)).format("DD/MM/YYYY hh:mm:ss");
+
+                    }
+                }
+                if (ll[0] == "dataMax") {
+                    myBle.dataMax = ll[1];
+                    if (theMode == "action") {
+                        datasRange.innerHTML = moment(dubToUnix(myBle.dataMin)).format("DD/MM/YYYY hh:mm:ss") + " - " + moment(dubToUnix(myBle.dataMax)).format("DD/MM/YYYY hh:mm:ss");
+                    }
+                }
                 if (ll[0] == "date") {
                     myBle.date = moment(ll[1], "DD.MM.YYYY").format("DD/MM/YYYY");
 
@@ -802,7 +935,7 @@ var app = {
                         myBle.liveCount = true;
                     }
                     if (theMode == "settings") {
-                        livecountState.checked = myBle.liveCount;
+                        livecountState.checked = Number(myBle.liveCount);
 
                     }
 

@@ -22,13 +22,13 @@
             <ons-page>
                 <ons-list>
                     <ons-list-item onclick="app.load('home.html')" tappable>
-                        Home
+                        Acceuil
                     </ons-list-item>
                     <ons-list-item onclick="app.load('action.html')" tappable>
                         Actions
                     </ons-list-item>
                     <ons-list-item onclick="app.load('settings.html')" tappable>
-                        Settings
+                        Configuration
                     </ons-list-item>
                     <ons-list-item onclick="app.load('chart.html')" tappable>
                         Graphique
@@ -42,10 +42,20 @@
     <ons-modal direction="up">
         <div style="text-align: center">
             <p>
-                <ons-icon icon="md-spinner" size="28px" spin></ons-icon> Loading...
+                <ons-icon icon="md-spinner" size="28px" spin></ons-icon> Chargement...
             </p>
         </div>
     </ons-modal>
+
+    <ons-modal direction="up" id="modal1">
+        <div class="modal__content">
+            <div><input type="text" class="text-input" placeholder="Password" id="passwordV" value=""></div>
+            <button onclick="app.checkPassword()" class="toast__button toast--material__button">Ok</button>
+
+        </div>
+    </ons-modal>
+
+
 
     <template id="home.html">
         <ons-page>
@@ -57,11 +67,11 @@
             </div>
 
             <div class="center">
-              potoBlue V2
+              potoBlue
             </div>
           </ons-toolbar>
           <p style="text-align: center; opacity: 0.6; padding-top: 20px;" onclick="app.refreshDeviceList()">
-            Afficher tous les potos
+            Afficher tous les poteaux
           </p>
           <ul class="list" id="deviceList">
                 
@@ -108,6 +118,10 @@
                 </ons-toolbar-button>
               </ons-col>
           </ons-row>
+          <div class="center">
+              <span id="datasRange"></span> 
+            </div>
+          
 
           <ul class="list" id="infosList">
                 
@@ -119,11 +133,11 @@
           <div class="toast toast--material">
             <button id="infoButton" onclick="app.askInfosN()" class="toast__button toast--material__button">Infos</button>
             <div class="toast__message toast--material__message"></div>
-            <button id="commandButton" onclick="app.askAllDatas()" class="toast__button toast--material__button">askAll</button>
+            <button id="commandButton" onclick="app.askAllDatas()" class="toast__button toast--material__button">Téléchargement</button>
             <div class="toast__message toast--material__message"></div>
             <button id="graphButton" class="toast__button toast--material__button" onclick="app.askInfosRange()">Test</button>
             <div class="toast__message toast--material__message"></div>
-            <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Quit</button>
+            <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Deconnection</button>
         </div>
         </ons-page>
         
@@ -138,7 +152,7 @@
               </ons-toolbar-button>
             </div>
             <div class="center">
-              <span>Settings </span> <span id="bleName" hidden="true"></span> | <span id="theTime"></span>
+              <span>Config </span> <span id="bleName" hidden="true"></span> | <span id="theTime"></span>
             </div>
           </ons-toolbar>
           <ons-progress-bar id="progressVal" value="0"></ons-progress-bar>
@@ -171,7 +185,7 @@
           <ons-list>
               <ons-list-item>
                   <label for="formatState-1" class="right">
-                    Format
+                    Formatter
                   </label>
                   <label class="switch switch--material">
                     <input type="checkbox" class="switch__input switch--material__input" input-id="formatState-1" id="formatState">
@@ -183,7 +197,7 @@
                 </ons-list-item>
             <ons-list-item>
               <label for="livecountState-1" class="right">
-                Livecount
+                Comptage en temps Réel
               </label>
               <label class="switch switch--material">
                 <input type="checkbox" class="switch__input switch--material__input" input-id="livecountState-1" id="livecountState">
@@ -208,7 +222,7 @@
             
               <ons-list-item>
                   <label for="graphState-1" class="right">
-                    Date
+                    Date JJ/MM/YYYY
                   </label>
                   <label class="switch switch--material">
                       <ons-input type="date" name= "test" float id="dateState"></ons-input>
@@ -218,7 +232,7 @@
 
                 <ons-list-item>
                     <label for="graphState-1" class="right">
-                      Heure  
+                      Heure hh:mm:ss
                     </label>
                     <label>
                         <ons-input type="time" name= "test" float id="timeState"></ons-input>
@@ -236,7 +250,7 @@
                     </ons-list-item>
                     <ons-list-item>
                         <label for="graphState-1" class="right">
-                          Treshold High  [0:2047]
+                          Seuil de détéction Haut  [0:2047]
                         </label>
                         <label class="text-input">
                             <ons-input type="text" name= "test" class="text-input" id="highState"></ons-input>
@@ -245,7 +259,7 @@
                       </ons-list-item>
                       <ons-list-item>
                           <label for="graphState-1" class="right">
-                            Treshold Low   [-2047:0]
+                              Seuil de détéction Bas   [-2047:0]
                           </label>
                           <label class="text-input">
                               <ons-input type="text" name= "test" class="text-input" id="lowState"></ons-input>
@@ -263,7 +277,7 @@
                           </ons-list-item>
                           <ons-list-item>
                               <label for="graphState-1" class="right">
-                                Blootooth Mode
+                                Mode Bluetooth infini
                               </label>
                               <label class="switch switch--material">
                                 <input type="checkbox" class="switch__input switch--material__input" input-id="graphState-1" id="blueState">
@@ -276,18 +290,18 @@
                           
               
           </ons-list>
-          <div class="button-bar" style="width:280px;">
-              <div class="button-bar__item">
+          <div class="button-bar" style="width:100%;">
+              <div class="button-bar__item" hidden="true">
                 <button class="button-bar__button"  onclick="app.askInfosN()">Infos</button>
               </div>
-              <div class="button-bar__item">
-                <button class="button-bar__button" onclick="app.askAllDatas()" >askAll</button>
+              <div class="button-bar__item" hidden="true">
+                <button class="button-bar__button" onclick="app.askAllDatas()" >Téléchargement</button>
               </div>
               <div class="button-bar__item">
-                <button class="button-bar__button" onclick="app.modeDev()">Save</button>
+                <button class="button-bar__button" onclick="app.modeDev()">Sauvegarder</button>
               </div>
-              <div class="button-bar__item">
-                  <button class="button-bar__button" onClick="app.disconnect()">Exit</button>
+              <div class="button-bar__item" >
+                  <button class="button-bar__button" onClick="app.disconnect()">Déconnection</button>
                 </div>
             </div>
           
@@ -310,7 +324,7 @@
           <canvas id="myCanvas"  width="300" height="200" style="border:1px solid #c3c3c3;">
             </canvas>
 
-            <button id="sizeButton" onclick="app.sizeCanvas()">FullSize</button>
+            <button id="sizeButton" onclick="app.sizeCanvas()">Plein écran</button>
 
             <div id="zoomView" >
                 <ons-range style="width: 100%;" id="zoomViewMin" value="0"></ons-range>
