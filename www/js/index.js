@@ -33,6 +33,7 @@ var theBiggestNumber = "14776335";
 var password = "sam261083";
 var myPassword = "";
 var httpd = null;
+var ipWifi = "0.0.0.0";
 
 function dubToUnix(dub) {
     var unix = 0;
@@ -236,18 +237,35 @@ var app = {
         app.load("home.html");
         console.log("Main page");
         app.refreshDeviceList();
+        ipWifiState.innerHTML = ipWifi;
     },
     onDeviceReady: function() {
+
         httpd = (cordova && cordova.plugins && cordova.plugins.CorHttpd) ? cordova.plugins.CorHttpd : null;
         startServer("/");
         app.refreshDeviceList();
         app.getFileList();
+        app.thePassword();
         app.getFilePassword();
+        networkinterface.getWiFiIPAddress(
+            function(ip, subnet) {
+                ipWifi = ip;
+                ipWifiState.innerHTML = ipWifi;
+
+                console.log(ip + ":" + subnet);
+            },
+            function(err) {
+                console.log("Err network: " + err);
+            }
+        );
     },
     thePassword: function() {
+        var modal1 = document.getElementById('modal1');
+
         if (myPassword != password) {
-            var modal1 = document.getElementById('modal1');
             modal1.show();
+        } else {
+            modal1.hide();
         }
     },
     checkPassword: function() {
@@ -255,7 +273,10 @@ var app = {
         console.log("Checking password : " + passwordV.value + " vs :" + password);
         if (passwordV.value == password) {
             console.log("ok");
+            app.createPassword(passwordV.value);
             modal1.hide();
+        } else {
+            passwordV.value = "Mauvais Mot De Passe";
         }
     },
     refreshDeviceList: function() {
@@ -273,7 +294,7 @@ var app = {
             console.log('file system open: ' + dirEntry.name);
             dirEntry.getDirectory('potoBlueV2', { create: true }, function(subDirEntry) {
                 var isAppend = true;
-                var theFilename = filename + ".txt"
+                var theFilename = filename + ".txt";
                 createFile(subDirEntry, theFilename, isAppend);
             }, console.log);
         }, app.getFileList);
@@ -284,7 +305,7 @@ var app = {
             console.log('file system open: ' + dirEntry.name);
             dirEntry.getDirectory('potoBlueV2pass', { create: true }, function(subDirEntry) {
                 var isAppend = true;
-                var theFilename = filename + ".txt"
+                var theFilename = filename;
                 createFile(subDirEntry, theFilename, isAppend);
             }, console.log);
         }, app.getFileList);
