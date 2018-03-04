@@ -38,6 +38,7 @@ var httpd = null;
 var ipWifi = "0.0.0.0";
 var mydataMin=0;
 var mydataMax=theBiggestNumber;
+var admin=1;
 
 
 
@@ -238,32 +239,40 @@ var app = {
     },
     load: function(page) {
         app.getFileList();
-        if ((page == "action.html") || (page == "settings.html")) {
+        if ((page == "action.html") || (page == "settings.html") || (page == "chart.html") || (page == "livecount.html")) {
             if (myDevice == "") {
                 alert("Vous n'êtes pas connecté...");
             } else {
-                if (page == "settings.html") {
-                    theMode = "settings";
-                }
-                if (page == "action.html") {
-                    theMode = "action";
-                }
+
                 var content = document.getElementById('content');
                 var menu = document.getElementById('menu');
                 
                 content.load(page).then(menu.close.bind(menu));
-                app.askInfosN();
+               
+                if (page == "settings.html") {
+                    theMode = "settings";
+                     app.askInfosN();
+                }
+                if (page == "action.html") {
+                    theMode = "action";
+                     app.askInfosN();
+                }
+                if (page == "chart.html") {
+                    theMode = "chart";
+                    canvas = document.getElementById("myCanvas");
+                    canvas.width = window.innerWidth;
+                }
+                if (page == "livecount.html") {
+                    theMode = "livecount";
+                    app.askInfosN();
+                }
+                
             }
         } else {
 
             var content = document.getElementById('content');
             var menu = document.getElementById('menu');
             content.load(page).then(menu.close.bind(menu));
-            if (page == "chart.html") {
-                theMode = "chart";
-                canvas = document.getElementById("myCanvas");
-                canvas.width = window.innerWidth;
-            }
         }
 
     },
@@ -292,6 +301,13 @@ var app = {
                 console.log("Err network: " + err);
             }
         );
+        window.addEventListener("orientationchange", function(){
+            console.log(screen.orientation.type); // e.g. portrait
+            if(theMode=="chart"){
+                app.sizeCanvas();
+            }
+            
+        });
     },
     thePassword: function() {
         var modal1 = document.getElementById('modal1');
@@ -407,7 +423,7 @@ var app = {
     },
     onDiscoverDevice: function(device) {
         var listItem = document.createElement('li'),
-            html = '<div class="list-item__center"><ons-icon icon="md-input-power"></ons-icon><b>' + device.name + '</b></div>';
+            html = '<div class="list-item__center"><ons-icon icon="md-bluetooth"></ons-icon><b>' + device.name + '</b></div>';
         listItem.innerHTML = html;
         listItem.class = "list-item list-item--tappable";
         listItem.addEventListener("click", function(e) {
@@ -465,6 +481,7 @@ var app = {
     },
     askInfosRange: function() {
         //app.getFileList();
+        app.askInfosN();
         var infosList = document.getElementById('infosList');
         infosList.innerHTML = "";
         var min = 0;
@@ -583,14 +600,19 @@ var app = {
         app.sendData(dataToSend);
     },
     askAllDatas: function() {
-        lastIndex = 0;
+        if(myBle.data==0){
+            alert("Il n'y a pas de données");
+        }else{
+            lastIndex = 0;
         buffLen = Math.max(myBle.data,100);
         dataBuffer = new Uint8Array(buffLen);
         requested = "sendAll2";
         //console.log("Asking All Datas...");
+
         modal.show();
         var dataToSend = "*" + toiMemeTuSais + ",data,"+mydataMin+","+mydataMax+"$";
         app.sendData(dataToSend);
+        }
     },
     modeDev: function() {
         console.log("livecount is :" + livecountState.checked);
@@ -599,7 +621,7 @@ var app = {
         console.log(dateState.value);
         var inputedDate = moment(dateState.value, "YYYY-MM-DD").format("DD/MM/YYYY");
         console.log("Date modif is : " + inputedDate);
-        if (inputedDate != myBle.date) {
+        if (inputedDate != myBle.date && admin) {
             console.log("Ble Date : " + myBle.date);
             console.log("Sending date = " + inputedDate);
             var theD = inputedDate.split("/");
@@ -607,7 +629,7 @@ var app = {
             console.log(theCommand);
             app.sendCommand(theCommand);
         }
-        if (timeState.value != myBle.time) {
+        if (timeState.value != myBle.time && admin) {
             console.log("Ble Time : " + myBle.time);
             console.log("Sending date = " + timeState.value);
             var theD = timeState.value.split(":");
@@ -616,16 +638,20 @@ var app = {
             app.sendCommand(theCommand);
         }
         if (livecountState.checked != myBle.liveCount) {
+
             console.log("Sending Livecount = " + Number(livecountState.checked));
             var theCommand = "liveCount," + Number(livecountState.checked);
             app.sendCommand(theCommand);
+            if(livecountState.checked==1){
+                app.load("livecount.html");
+            }
         }
         if (nameState.value != myBle.name) {
             console.log("Sending Name = " + nameState.value);
             var theCommand = "setName," + nameState.value;
             app.sendCommand(theCommand);
         }
-        if (formatState.checked == true) {
+        if (formatState.checked == true && admin) {
             console.log("Sending Format = ");
             var theCommand = "format";
             app.sendCommand(theCommand);
@@ -635,8 +661,11 @@ var app = {
             var theCommand = "chart," + Number(chartState.checked) + ",35";
             requested = "graph";
             app.sendCommandG(theCommand);
+            if(chartState.checked==1){
+                app.load("chart.html");
+            }
         }
-        if (Number(blueState.checked) != Number(myBle.bluetoothMode)) {
+        if (Number(blueState.checked) != Number(myBle.bluetoothMode) && admin) {
             console.log("Sending BluetoothMode = " + blueState.checked);
             var theCommand = "btMode," + Number(blueState.checked);
             app.sendCommand(theCommand);
@@ -661,7 +690,7 @@ var app = {
         }
     },
     onError: function(reason) {
-        alert("ERROR: " + JSON.stringify(reason)); // real apps should use notification.alert
+        alert("Erreur de Connection"); // real apps should use notification.alert
     },
     sendData: function(dataToSend) { // send data to Arduino
         //console.log("Sending data :");
@@ -927,15 +956,19 @@ var app = {
                 }
 
             });
+            console.log(theMode);
             result.forEach(function(ll) {
                 //console.log(ll);
+                
                 console.log(ll[0] + " is : " + ll[1]);
+
                 //debugLog(ll);
                 if (ll[0] == "name") {
                     myBle.name = ll[1];
                     //blePos.innerHTML = posX + " " + posY;
+                    
                     bleName.innerHTML = myBle.name;
-                    if (theMode == "settings") {
+                    if (theMode == "settings" ) {
                         nameState.value = myBle.name;
                     }
                 }
@@ -944,12 +977,21 @@ var app = {
                 }
                 if (ll[0] == "dataCorrupted") {
                     myBle.dataCorrupted = ll[1];
+                    if(myBle.dataCorrupted=="1"){
+                        alert("Données corrompues...");
+                    }
                 }
                 if (ll[0] == "diagPir") {
                     myBle.diagPir = ll[1];
                 }
                 if (ll[0] == "diagFlash") {
                     myBle.diagFlash = ll[1];
+                }
+                if (ll[0] == "chipErased") {
+                    myBle.chipErased = ll[1];
+                    if(myBle.chipErased=="1"){
+                        alert("Données Effacées avec Succes...");
+                    }
                 }
                 if (ll[0] == "dataMin") {
                     myBle.dataMin = ll[1];
@@ -974,20 +1016,28 @@ var app = {
                 }
                 if (ll[0] == "time") {
                     myBle.time = ll[1];
+
+                    if (theMode == "action" || theMode == "settings" ) {
+                        theTime.innerHTML = myBle.time;
+
+                    }
                     //var theTimeb = document.getElementById('theTimeb');
-                    theTime.innerHTML = myBle.time;
-                    if (theMode == "settings") {
+                    if (theMode == "settings" ) {
 
                         timeState.value = myBle.time;
                     }
                 }
                 if (ll[0] == "temp") {
                     myBle.temp = ll[1];
+                    if (theMode == "action" || theMode == "settings" ) {
                     temperature.innerHTML = myBle.temp;
+                }
                 }
                 if (ll[0] == "voltage") {
                     myBle.voltage = ll[1];
+                    if (theMode == "action" || theMode == "settings" ) {
                     voltage.innerHTML = myBle.voltage + " V";
+                }
                 }
                 if (ll[0] == "scale") {
                     myBle.scale = ll[1];
@@ -1016,7 +1066,6 @@ var app = {
                     myBle.tresholdHigh = ll[1];
                     if (theMode == "settings") {
                         highState.value = myBle.tresholdHigh;
-
                     }
                 }
                 if (ll[0] == "thresholdLow") {
@@ -1042,18 +1091,20 @@ var app = {
                 }
                 if (ll[0] == "data") {
                     myBle.data = Number(ll[1]) * 8;
-                    dataNumber.innerHTML = Number(ll[1]);
+                    if (theMode == "settings" || theMode == "action") {
+                        dataNumber.innerHTML = Number(ll[1]);
+                    }
                 }
                 if (ll[0] == "liveLeftMove") {
                     myBle.left = myBle.left + Number(ll[1]);
-                    if (theMode == "action") {
-                        liveNumber.innerHTML = myBle.left + "|" + myBle.right;
+                    if (theMode == "livecount") {
+                        liveNumberLeft.innerHTML = myBle.left;
                     }
                 }
                 if (ll[0] == "liveRightMove") {
                     myBle.right = myBle.right + Number(ll[1]);
-                    if (theMode == "action") {
-                        liveNumber.innerHTML = myBle.left + "|" + myBle.right;
+                    if (theMode == "livecount") {
+                        liveNumberRight.innerHTML = myBle.right;
                     }
 
                 }

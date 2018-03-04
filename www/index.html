@@ -34,6 +34,9 @@
                     <ons-list-item onclick="app.load('chart.html')" tappable>
                         Graphique
                     </ons-list-item>
+                    <ons-list-item onclick="app.load('livecount.html')" tappable>
+                        Temps Reel
+                    </ons-list-item>
                 </ons-list>
             </ons-page>
         </ons-splitter-side>
@@ -89,7 +92,7 @@
               </ons-toolbar-button>
             </div>
             <div class="center">
-              <span id="bleName"></span> | <span id="theTime"></span>| <span id="liveNumber"></span>
+              <span id="bleName"></span> | <span id="theTime"></span>
             </div>
           </ons-toolbar>
           <ons-progress-bar id="progressVal" value="0"></ons-progress-bar>
@@ -134,15 +137,19 @@
                 
             </ul>
 
-            
+            <div class="button-bar" style="width:100%;">
+              <div class="button-bar__item">
+                <button class="button-bar__button" onclick="app.askInfosRange()">Actualiser</button>
+              </div>
+              <div class="button-bar__item" >
+                  <button class="button-bar__button" onClick="app.askAllDatas()">Télécharger</button>
+                </div>
+            </div>
 
           
           <div class="toast toast--material">
-            <button id="infoButton" onclick="app.askInfosN()" class="toast__button toast--material__button">Infos</button>
-            <div class="toast__message toast--material__message"></div>
-            <button id="commandButton" onclick="app.askAllDatas()" class="toast__button toast--material__button">Téléchargement</button>
-            <div class="toast__message toast--material__message"></div>
-            <button id="graphButton" class="toast__button toast--material__button" onclick="app.askInfosRange()">Test</button>
+            
+            
             <div class="toast__message toast--material__message"></div>
             <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Quit</button>
         </div>
@@ -306,7 +313,7 @@
                 <button class="button-bar__button" onclick="app.askAllDatas()" >Téléchargement</button>
               </div>
               <div class="button-bar__item">
-                <button class="button-bar__button" onclick="app.modeDev()">Sauvegarder</button>
+                <button class="button-bar__button" onclick="app.modeDev()">Appliquer</button>
               </div>
               <div class="button-bar__item" >
                   <button class="button-bar__button" onClick="app.disconnect()">Déconnection</button>
@@ -329,6 +336,7 @@
               Graphique
             </div>
           </ons-toolbar>
+          <script type="text/javascript">app.sizeCanvas();</script>
           <canvas id="myCanvas"  width="300" height="200" style="border:1px solid #c3c3c3;">
             </canvas>
 
@@ -342,6 +350,45 @@
           
         </ons-page>
       </template>
+
+
+
+      <template id="livecount.html">
+        <ons-page>
+          <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button onclick="app.open()">
+                <ons-icon icon="md-menu"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">
+              Temps Reel <span id="bleName" hidden="true"><span id="theTime"></span>
+            </div>
+          </ons-toolbar>
+          <ons-progress-bar id="progressVal" value="0"></ons-progress-bar>
+          <ons-row align="center">
+              <ons-col >
+                      <ons-toolbar-button>
+                              <ons-icon
+                              icon="md-arrow-right">
+                            </ons-icon>
+                            <span id="liveNumberLeft"></span>
+                      </ons-toolbar-button>
+                    </ons-col>
+              <ons-col>
+                <ons-toolbar-button>
+                      <ons-icon
+                      icon="md-arrow-left">
+                    </ons-icon>
+                    <span id="liveNumberRight"></span>
+                </ons-toolbar-button>
+              </ons-col>
+          </ons-row>
+          
+        
+        </ons-page>
+      </template>
+
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
     <script type="text/javascript">
