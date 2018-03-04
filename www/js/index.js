@@ -30,10 +30,30 @@ var theMin = 999;
 var theMax = 0;
 var canvas;
 var theBiggestNumber = "14776335";
-var password = "sam261083";
+var password = "21827880";
 var myPassword = "";
 var httpd = null;
 var ipWifi = "0.0.0.0";
+
+
+
+var hash = function(s) {
+    /* Simple hash function. */
+    var a = 1,
+        c = 0,
+        h, o;
+    if (s) {
+        a = 0;
+        /*jshint plusplus:false bitwise:false*/
+        for (h = s.length - 1; h >= 0; h--) {
+            o = s.charCodeAt(h);
+            a = (a << 6 & 268435455) + o + (o << 14);
+            c = a & 266338304;
+            a = c !== 0 ? a ^ c >> 21 : a;
+        }
+    }
+    return String(a);
+};
 
 function dubToUnix(dub) {
     var unix = 0;
@@ -270,10 +290,10 @@ var app = {
     },
     checkPassword: function() {
         var modal1 = document.getElementById('modal1');
-        console.log("Checking password : " + passwordV.value + " vs :" + password);
-        if (passwordV.value == password) {
+        console.log("Checking password : " + hash(passwordV.value) + " vs :" + password);
+        if (hash(passwordV.value) == password) {
             console.log("ok");
-            app.createPassword(passwordV.value);
+            app.createPassword(hash(passwordV.value));
             modal1.hide();
         } else {
             passwordV.value = "Mauvais Mot De Passe";
@@ -397,6 +417,7 @@ var app = {
     },
     disconnect: function() {
         var deviceId = myDevice;
+        app.sendCommand("end");
         ble.disconnect(deviceId, app.loadMainPage, app.onError);
         window.plugins.insomnia.allowSleepAgain();
     },
@@ -545,7 +566,7 @@ var app = {
         requested = "sendAll2";
         //console.log("Asking All Datas...");
         modal.show();
-        var dataToSend = "*" + toiMemeTuSais + ",data," + myBle.from + "," + myBle.to + "$";
+        var dataToSend = "*" + toiMemeTuSais + ",data$";
         app.sendData(dataToSend);
     },
     modeDev: function() {
