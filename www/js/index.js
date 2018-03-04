@@ -232,13 +232,25 @@ var app = {
     },
     bindEvents: function() {
         document.addEventListener('deviceready', this.onDeviceReady, false);
+        window.addEventListener("orientationchange", function(){
+            if(theMode=="chart"){
+                setTimeout(function() {
+                    app.sizeCanvas();
+                }, 1000);
+                
+            }
+            console.log(screen.orientation.type); // e.g. portrait
+        });
+        
+
     },
     open: function() {
         var menu = document.getElementById('menu');
         menu.open();
     },
     load: function(page) {
-        app.getFileList();
+        
+
         if ((page == "action.html") || (page == "settings.html") || (page == "chart.html") || (page == "livecount.html")) {
             if (myDevice == "") {
                 alert("Vous n'êtes pas connecté...");
@@ -248,6 +260,9 @@ var app = {
                 var menu = document.getElementById('menu');
                 
                 content.load(page).then(menu.close.bind(menu));
+                if(theMode=="chart"){
+                    app.sendCommand("chart,0");
+                }
                
                 if (page == "settings.html") {
                     theMode = "settings";
@@ -256,6 +271,7 @@ var app = {
                 if (page == "action.html") {
                     theMode = "action";
                      app.askInfosN();
+                     app.getFileList();
                 }
                 if (page == "chart.html") {
                     theMode = "chart";
@@ -301,13 +317,7 @@ var app = {
                 console.log("Err network: " + err);
             }
         );
-        window.addEventListener("orientationchange", function(){
-            console.log(screen.orientation.type); // e.g. portrait
-            if(theMode=="chart"){
-                app.sizeCanvas();
-            }
-            
-        });
+        
     },
     thePassword: function() {
         var modal1 = document.getElementById('modal1');
@@ -362,12 +372,12 @@ var app = {
         }, app.getFileList);
     },
     getFileList: function() {
-        debugLog("Requesting File System");
+        //debugLog("Requesting File System");
         window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
-            console.log('file system open: ' + dirEntry.name);
+            //console.log('file system open: ' + dirEntry.name);
             theFileList = [];
             dirEntry.getDirectory('potoBlueV2', { create: true }, function(subDirEntry) {
-                console.log("Subentry");
+                //console.log("Subentry");
                 var reader = subDirEntry.createReader();
                 reader.readEntries(
                     function(entries) {
@@ -378,7 +388,7 @@ var app = {
                             var from = fiVal[1];
                             var to = fiVal[2];
                             to = to.substring(0, to.length - 4);
-                            console.log(name + " - " + from + " - " + to);
+                            //console.log(name + " - " + from + " - " + to);
                             var obj = {};
                             obj.name = name;
                             obj.from = Number(from);
@@ -394,15 +404,15 @@ var app = {
                 );
 
             }, console.log);
-        }, debugLog("Fs done"));
+        }, app.askInfosRange);
     },
     getFilePassword: function() {
-        debugLog("Requesting File System");
+        //debugLog("Requesting File System");
         window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
-            console.log('file system open: ' + dirEntry.name);
+            //console.log('file system open: ' + dirEntry.name);
             theFileList = [];
             dirEntry.getDirectory('potoBlueV2pass', { create: true }, function(subDirEntry) {
-                console.log("Subentry");
+                //console.log("Subentry");
                 var reader = subDirEntry.createReader();
                 reader.readEntries(
                     function(entries) {
@@ -431,10 +441,10 @@ var app = {
         }, false);
         var deviceList = document.getElementById('deviceList');
         deviceList.appendChild(listItem);
-        console.log(device.id, device.name);
+        //console.log(device.id, device.name);
     },
     connect: function(target, nameT) {
-        console.log("Connection to " + target);
+        //console.log("Connection to " + target);
         var deviceId = target,
             onConnect = function(peripheral) {
                 app.determineWriteType(peripheral);
@@ -443,6 +453,8 @@ var app = {
                 myDeviceName = nameT;
                 app.load("action.html");
                 app.askInfosN();
+
+                //app.getFileList();
             };
         ble.connect(deviceId, onConnect, app.onError);
     },
@@ -762,6 +774,7 @@ var app = {
         }
     },
     sizeCanvas: function() {
+        console.log("Orientation Change");
         canvas = document.getElementById("myCanvas");
         canvas.width = window.innerWidth;
     },
@@ -960,7 +973,7 @@ var app = {
             result.forEach(function(ll) {
                 //console.log(ll);
                 
-                console.log(ll[0] + " is : " + ll[1]);
+                //console.log(ll[0] + " is : " + ll[1]);
 
                 //debugLog(ll);
                 if (ll[0] == "name") {

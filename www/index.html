@@ -31,12 +31,6 @@
                     <ons-list-item onclick="app.load('settings.html')" tappable>
                         Configuration
                     </ons-list-item>
-                    <ons-list-item onclick="app.load('chart.html')" tappable>
-                        Graphique
-                    </ons-list-item>
-                    <ons-list-item onclick="app.load('livecount.html')" tappable>
-                        Temps Reel
-                    </ons-list-item>
                 </ons-list>
             </ons-page>
         </ons-splitter-side>
@@ -306,12 +300,6 @@
               
           </ons-list>
           <div class="button-bar" style="width:100%;">
-              <div class="button-bar__item" hidden="true">
-                <button class="button-bar__button"  onclick="app.askInfosN()">Infos</button>
-              </div>
-              <div class="button-bar__item" hidden="true">
-                <button class="button-bar__button" onclick="app.askAllDatas()" >Téléchargement</button>
-              </div>
               <div class="button-bar__item">
                 <button class="button-bar__button" onclick="app.modeDev()">Appliquer</button>
               </div>
@@ -340,7 +328,7 @@
           <canvas id="myCanvas"  width="300" height="200" style="border:1px solid #c3c3c3;">
             </canvas>
 
-            <button id="sizeButton" onclick="app.sizeCanvas()">Plein écran</button>
+            <!--<button id="sizeButton" onclick="app.sizeCanvas()">Plein écran</button>-->
 
             <div id="zoomView" >
                 <ons-range style="width: 100%;" id="zoomViewMin" value="0"></ons-range>
@@ -384,6 +372,12 @@
                 </ons-toolbar-button>
               </ons-col>
           </ons-row>
+          <div class="toast toast--material">
+            
+            
+            <div class="toast__message toast--material__message"></div>
+            <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Quit</button>
+        </div>
           
         
         </ons-page>
