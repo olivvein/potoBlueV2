@@ -227,7 +227,7 @@ var app = {
     load: function(page) {
         if ((page == "action.html") || (page == "settings.html")) {
             if (myDevice == "") {
-                alert("you are not connected");
+                alert("Vous n'êtes pas connecté...");
             } else {
                 if (page == "settings.html") {
                     theMode = "settings";
@@ -420,6 +420,7 @@ var app = {
         app.sendCommand("end");
         ble.disconnect(deviceId, app.loadMainPage, app.onError);
         window.plugins.insomnia.allowSleepAgain();
+        myDevice="";
     },
     askInfos: function(from, to) {
         console.log("asking infos :", from, to);
