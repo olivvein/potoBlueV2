@@ -266,20 +266,24 @@ var app = {
                
                 if (page == "settings.html") {
                     theMode = "settings";
+                    screen.orientation.unlock();
                      app.askInfosN();
                 }
                 if (page == "action.html") {
                     theMode = "action";
+                    screen.orientation.unlock();
                      app.askInfosN();
                      app.getFileList();
                 }
                 if (page == "chart.html") {
                     theMode = "chart";
+                    screen.orientation.unlock();
                     canvas = document.getElementById("myCanvas");
                     canvas.width = window.innerWidth;
                 }
                 if (page == "livecount.html") {
                     theMode = "livecount";
+                    screen.lockOrientation('portrait');
                     app.askInfosN();
                 }
                 
@@ -357,7 +361,7 @@ var app = {
                 var isAppend = true;
                 var theFilename = filename + ".txt";
                 createFile(subDirEntry, theFilename, isAppend);
-            }, console.log);
+            }, alert("Fichier créé :)"));
         }, app.getFileList);
     },
     createPassword: function(filename) {
@@ -823,7 +827,7 @@ var app = {
                         }
 
                         var formulaSimple = function(chiffre) {
-                            return 200 - mapToNumber(Number(chiffre), 200 - rangeMin.value * 20, rangeMax.value * 20, 0, 200);
+                            return 200 - mapToNumber(Number(chiffre), 200 - rangeMin.value * 40, rangeMax.value * 40, 0, 200);
                             //return 200 - Number(chiffre) / 4;
                         }
 

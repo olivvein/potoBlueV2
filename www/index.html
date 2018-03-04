@@ -331,7 +331,7 @@
             <!--<button id="sizeButton" onclick="app.sizeCanvas()">Plein écran</button>-->
 
             <div id="zoomView" >
-                <ons-range style="width: 100%;" id="zoomViewMin" value="20"></ons-range>
+                <ons-range style="width: 100%;" id="zoomViewMin" value="50"></ons-range>
                 <ons-range style="width: 100%;" id="zoomViewMax" value="50"></ons-range>
             </div>
 
@@ -357,24 +357,44 @@
           <ons-row align="center">
               <ons-col >
                       <ons-toolbar-button>
-                              <ons-icon
-                              icon="md-arrow-right">
-                            </ons-icon>
-                            <span id="liveNumberLeft"></span>
+                              <img src="css/icon.png" width="100%"></img>
                       </ons-toolbar-button>
                     </ons-col>
               <ons-col>
                 <ons-toolbar-button>
-                      <ons-icon
-                      icon="md-arrow-left">
-                    </ons-icon>
-                    <span id="liveNumberRight"></span>
+                  <img src="css/icon.png" width="100%" style="transform: scaleX(-1);"></img>
+                
                 </ons-toolbar-button>
               </ons-col>
           </ons-row>
+
+          <ons-row>
+            <ons-col>
+                      
+            </ons-col>
+            <ons-col>
+                      <ons-toolbar-button class="center">
+                            <button class="fab " style="background-color:#008080;"><span id="liveNumberLeft"></span></button>
+                      </ons-toolbar-button>
+                    </ons-col>
+
+              <ons-col>
+                      
+              </ons-col>
+              <ons-col>
+                      
+              </ons-col>
+              <ons-col>
+                <ons-toolbar-button>
+                    <button class="fab" style="background-color:#008080;"><span id="liveNumberRight"></span></button>
+                </ons-toolbar-button>
+              </ons-col>
+              <ons-col>
+                      
+              </ons-col>
+          </ons-row>
+
           <div class="toast toast--material">
-            
-            
             <div class="toast__message toast--material__message"></div>
             <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Quit</button>
         </div>
