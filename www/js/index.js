@@ -19,6 +19,8 @@
 'use strict';
 
 
+//motdepasse="poteau932IDJsi"
+
 var x = 0;
 var lasty = 0;
 var lastyk = 0;
@@ -30,7 +32,7 @@ var theMin = 999;
 var theMax = 0;
 var canvas;
 var theBiggestNumber = "14776335";
-var password = "21827880";
+var password = "196017197";
 var myPassword = "";
 var httpd = null;
 var ipWifi = "0.0.0.0";
@@ -83,7 +85,7 @@ var objD = {};
 var modal = document.querySelector('ons-modal');
 var myDeviceName = "";
 var theMode = "normal";
-var toiMemeTuSais = "kD0%mspEl";
+var toiMemeTuSais = "kD0%mspEl"; 
 var myDevice = "";
 var buffLen = 10000;
 var dataBuffer = new Uint8Array(buffLen);
