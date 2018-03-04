@@ -264,7 +264,7 @@ var app = {
     onDeviceReady: function() {
 
         httpd = (cordova && cordova.plugins && cordova.plugins.CorHttpd) ? cordova.plugins.CorHttpd : null;
-        startServer("/");
+        startServer("/sdcard/potoBlueV2/");
         app.refreshDeviceList();
         app.getFileList();
         app.thePassword();
