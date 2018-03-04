@@ -21,5 +21,5 @@
     <preference name="AndroidExtraFilesystems" value="files,files-external,documents,sdcard,cache,cache-external,assets,root" />
     <icon src="icon.png" />
     <plugin name="cordova-plugin-insomnia" spec="https://github.com/EddyVerbruggen/Insomnia-PhoneGap-Plugin.git" />
-    <plugin name="net.yoik.cordova.plugins.screenorientation" source="pgb" />
+    <plugin name="cordova-plugin-screen-orientation" spec="~3.0.1" />
 </widget>
