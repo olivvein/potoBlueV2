@@ -36,6 +36,8 @@ var password = "196017197";
 var myPassword = "";
 var httpd = null;
 var ipWifi = "0.0.0.0";
+var mydataMin=0;
+var mydataMax=theBiggestNumber;
 
 
 
@@ -67,6 +69,14 @@ function unixToDub(unix) {
     var dub = 0;
     dub = (unix - 1483228800000) / 100000;
     return Number(dub);
+}
+
+function dubToHuman(dub){
+    return moment(dubToUnix(dub)).subtract(1,"hours").tz("Europe/Paris").format("DD/MM/YYYY HH:mm:ss");
+}
+
+function humanToDub(human){
+    return unixToDub(moment(human, "DD/MM/YYYY HH:mm:ss").add(1,"hours"));
 }
 
 function dynamicSort(property) {
@@ -227,6 +237,7 @@ var app = {
         menu.open();
     },
     load: function(page) {
+        app.getFileList();
         if ((page == "action.html") || (page == "settings.html")) {
             if (myDevice == "") {
                 alert("Vous n'êtes pas connecté...");
@@ -239,6 +250,7 @@ var app = {
                 }
                 var content = document.getElementById('content');
                 var menu = document.getElementById('menu');
+                
                 content.load(page).then(menu.close.bind(menu));
                 app.askInfosN();
             }
@@ -298,7 +310,8 @@ var app = {
             app.createPassword(hash(passwordV.value));
             modal1.hide();
         } else {
-            passwordV.value = "Mauvais Mot De Passe";
+            alert("Mauvais mot de passe...");
+            passwordV.value = "";
         }
     },
     refreshDeviceList: function() {
@@ -354,7 +367,9 @@ var app = {
                             obj.name = name;
                             obj.from = Number(from);
                             obj.to = Number(to);
-                            theFileList.push(obj);
+                            if (obj.name == myBle.name) {
+                                theFileList.push(obj);
+                            }
                         });
                     },
                     function(err) {
@@ -392,9 +407,7 @@ var app = {
     },
     onDiscoverDevice: function(device) {
         var listItem = document.createElement('li'),
-            html = '<div class="list-item__center"><ons-icon icon="md-input-power"></ons-icon><b>' + device.name + '</b>' +
-            '&nbsp;|&nbsp;RSSI: ' + device.rssi + '&nbsp;|&nbsp; SSID: ' +
-            device.id + '</div>';
+            html = '<div class="list-item__center"><ons-icon icon="md-input-power"></ons-icon><b>' + device.name + '</b></div>';
         listItem.innerHTML = html;
         listItem.class = "list-item list-item--tappable";
         listItem.addEventListener("click", function(e) {
@@ -439,6 +452,8 @@ var app = {
     },
     askInfosN: function() {
         console.log("asking infos :");
+        mydataMin=myBle.dataMin;
+        mydataMax=myBle.dataMax;
         lastIndex = 0;
         buffLen = 500;
         requested = "infos";
@@ -464,11 +479,11 @@ var app = {
             console.log(theFileList[jj].name + " - " + myDeviceName)
             if (theFileList[jj].name == myBle.name) {
                 var listItem4 = document.createElement('li'),
-                    html9 = '<div class="list-item__center">De:<b>' + moment(dubToUnix(theMin)).format("DD/MM/YYYY hh:mm:ss") + '</b>' +
-                    '&nbsp;|&nbsp;à: ' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY hh:mm:ss");
+                    html9 = '<div class="list-item__center">De:<b>' + dubToHuman(theMin) + '</b>' +
+                    '&nbsp;|&nbsp;à: ' + dubToHuman(theFileList[jj].from);
                 listItem4.innerHTML = html9;
                 listItem4.class = "list-item list-item--tappable";
-                console.log("1:  " + moment(dubToUnix(theMin)).format("DD/MM/YYYY hh:mm:ss") + " - " + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY hh:mm:ss"));
+                console.log("1:  " + dubToHuman(theMin) + " - " + dubToHuman(theFileList[jj].from));
 
                 listItem4.addEventListener("click", function(e) {
                     var iiner = e.target.innerHTML;
@@ -477,10 +492,12 @@ var app = {
                     fromD = fromD.substring(0, fromD.indexOf("</b>"));
 
                     var toD = iiner.substring(iiner.indexOf("à: ") + 3);
-                    var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY hh:mm:ss"));
-                    var toDate = unixToDub(moment(toD, "DD/MM/YYYY hh:mm:ss"));
+                    var fromDate = humanToDub(fromD);
+                    var toDate = humanToDub(toD);
                     console.log("From: " + fromDate);
                     console.log("To: " + toDate);
+                    mydataMin=fromDate;
+                    mydataMax=toDate;
                     app.askInfos(String(fromDate), String(toDate));
                 }, false);
                 infosList.appendChild(listItem4);
@@ -489,19 +506,19 @@ var app = {
                 console.log("Debut debug : ");
                 var nnkk = Number(theFileList[jj].to) - Number(432);
                 console.log(theFileList[jj].from + " - " + nnkk);
-                console.log(moment(dubToUnix(theFileList[jj].from)) + " - " + moment(dubToUnix(nnkk)));
-                var tiF = moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY hh:mm:ss");
-                var tiT = moment(dubToUnix(nnkk)).format("DD/MM/YYYY hh:mm:ss");
+                console.log(dubToHuman(theFileList[jj].from) + " - " + dubToHuman(nnkk));
+                var tiF = dubToHuman(theFileList[jj].from);
+                var tiT = dubToHuman(nnkk);
                 console.log(tiF + " - " + tiT);
-                var theDDd = Number(unixToDub(moment(tiT, "DD/MM/YYYY hh:mm:ss")));
-                console.log(unixToDub(moment(tiF, "DD/MM/YYYY hh:mm:ss")) + " - " + theDDd);
+                var theDDd = Number(humanToDub(tiT));
+                console.log(humanToDub(tiF) + " - " + theDDd);
 
                 var listItem5 = document.createElement('li'),
-                    html91 = '<div class="list-item__center">Vous avez depuis :<b>' + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY hh:mm:ss") + '</b>' +
-                    "&nbsp;|&nbsp;jusqu'à: " + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY hh:mm:ss");
+                    html91 = '<div class="list-item__center">Vous avez depuis :<b>' + dubToHuman(theFileList[jj].from) + '</b>' +
+                    "&nbsp;|&nbsp;jusqu'à: " + dubToHuman(theFileList[jj].to);
                 listItem5.innerHTML = html91;
                 listItem5.class = "list-item list-item--tappable";
-                console.log("2:  " + moment(dubToUnix(theFileList[jj].from)).format("DD/MM/YYYY hh:mm:ss") + " - " + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY hh:mm:ss"));
+                console.log("2:  " + dubToHuman(theFileList[jj].from) + " - " + dubToHuman(theFileList[jj].to));
                 //console.log(theFileList[jj].to);
                 listItem5.addEventListener("click", function(e) {
                     var iiner = e.target.innerHTML;
@@ -509,22 +526,24 @@ var app = {
                     fromD = fromD.substring(0, fromD.indexOf("</b>"));
 
                     var toD = iiner.substring(iiner.indexOf("à: ") + 3);
-                    var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY hh:mm:ss"));
-                    var toDate = unixToDub(moment(toD, "DD/MM/YYYY hh:mm:ss").add(13, "h"));
+                    var fromDate = humanToDub(fromD);
+                    var toDate = humanToDub(toD);
                     console.log(toDate);
+                    mydataMin=fromDate;
+                    mydataMax=toDate;
                     app.askInfos(String(fromDate), String(toDate));
                 }, false);
                 infosList.appendChild(listItem5);
-                //console.log(jj);
-                //console.log(theFileList.length - 1);
-                if (jj == theFileList.length - 1) {
-                    //console.log("should happend .......");
+                console.log(jj);
+                console.log(theFileList.length - 1);
+                if (jj == theFileList.length -1) {
+                    console.log("should happend .......");
                     var listItem1 = document.createElement('li'),
-                        html1 = '<div class="list-item__center">De :<b>' + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY hh:mm:ss") + '</b>' +
-                        '&nbsp;|&nbsp;à: ' + moment(dubToUnix(theMax)).format("DD/MM/YYYY hh:mm:ss") + '</div>';
+                        html1 = '<div class="list-item__center">De :<b>' + dubToHuman(theFileList[jj].to) + '</b>' +
+                        '&nbsp;|&nbsp;à: ' + dubToHuman(theMax) + '</div>';
                     listItem1.innerHTML = html1;
                     listItem1.class = "list-item list-item--tappable";
-                    //console.log("3:  " + moment(dubToUnix(theFileList[jj].to)).format("DD/MM/YYYY hh:mm:ss") + " - " + moment(dubToUnix(14776335)).format("DD/MM/YYYY hh:mm:ss"));
+                    //console.log("3:  " + moment(dubToUnix(theFileList[jj].to) + " - " + moment(dubToUnix(14776335));
 
                     listItem1.addEventListener("click", function(e) {
                         var iiner = e.target.innerHTML;
@@ -534,9 +553,10 @@ var app = {
                         //console.log(fromD);
 
                         var toD = iiner.substring(iiner.indexOf("à: ") + 3);
-                        var fromDate = unixToDub(moment(fromD, "DD/MM/YYYY hh:mm:ss"));
-                        var toDate = unixToDub(moment(toD, "DD/MM/YYYY hh:mm:ss"));
-
+                        var fromDate = humanToDub(fromD);
+                        var toDate = humanToDub(toD);
+                        mydataMin=fromDate;
+                    mydataMax=toDate;
                         app.askInfos(String(fromDate), String(toDate));
                     }, false);
                     infosList.appendChild(listItem1);
@@ -564,12 +584,12 @@ var app = {
     },
     askAllDatas: function() {
         lastIndex = 0;
-        buffLen = myBle.data;
+        buffLen = Math.max(myBle.data,100);
         dataBuffer = new Uint8Array(buffLen);
         requested = "sendAll2";
         //console.log("Asking All Datas...");
         modal.show();
-        var dataToSend = "*" + toiMemeTuSais + ",data$";
+        var dataToSend = "*" + toiMemeTuSais + ",data,"+mydataMin+","+mydataMax+"$";
         app.sendData(dataToSend);
     },
     modeDev: function() {
@@ -934,14 +954,14 @@ var app = {
                 if (ll[0] == "dataMin") {
                     myBle.dataMin = ll[1];
                     if (theMode == "action") {
-                        datasRange.innerHTML = moment(dubToUnix(myBle.dataMin)).format("DD/MM/YYYY hh:mm:ss") + " - " + moment(dubToUnix(myBle.dataMax)).format("DD/MM/YYYY hh:mm:ss");
+                        datasRangeMin.innerHTML = dubToHuman(myBle.dataMin);
 
                     }
                 }
                 if (ll[0] == "dataMax") {
                     myBle.dataMax = ll[1];
                     if (theMode == "action") {
-                        datasRange.innerHTML = moment(dubToUnix(myBle.dataMin)).format("DD/MM/YYYY hh:mm:ss") + " - " + moment(dubToUnix(myBle.dataMax)).format("DD/MM/YYYY hh:mm:ss");
+                        datasRangeMax.innerHTML = dubToHuman(myBle.dataMax);
                     }
                 }
                 if (ll[0] == "date") {
@@ -1121,8 +1141,8 @@ var app = {
 
             });
             allDatas = 'time,gauche,droite\n';
-            var firstTime = "";
-            var lastTime = "";
+            var firstTime = "0";
+            var lastTime = "1";
             result.forEach(function(rr) {
 
                 if (rr[2] != undefined) {

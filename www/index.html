@@ -11,6 +11,7 @@
 
     <script src="js/onsenui.min.js"></script>
     <script src="js/moment.js"></script>
+    <script src="js/moment-timezone-with-data.min.js"></script>
     <!--<script src="http://192.168.137.1:8080/target/target-script-min.js#anonymous"></script>-->
 
     <title>potoBlue</title>
@@ -119,7 +120,13 @@
               </ons-col>
           </ons-row>
           <div class="center">
-              <span id="datasRange"></span> 
+            <div>Datas disponibles du :
+              <span id="datasRangeMin"></span> 
+            </div>
+            <div>
+            Au :
+            <span id="datasRangeMax"></span> 
+          </div>
             </div>
           
 
@@ -183,18 +190,6 @@
               </ons-col>
           </ons-row>
           <ons-list>
-              <ons-list-item style="visibility:hidden;">
-                  <label for="formatState-1" class="right">
-                    Formatter
-                  </label>
-                  <label class="switch switch--material">
-                    <input type="checkbox" class="switch__input switch--material__input" input-id="formatState-1" id="formatState">
-                    <div class="switch__toggle switch--material__toggle">
-                      <div class="switch__handle switch--material__handle">
-                      </div>
-                    </div>
-                  </label>
-                </ons-list-item>
             <ons-list-item>
               <label for="livecountState-1" class="right">
                 Comptage en temps Réel
@@ -220,25 +215,7 @@
                 </label>
               </ons-list-item>
             
-              <ons-list-item>
-                  <label for="graphState-1" class="right">
-                    Date JJ/MM/YYYY
-                  </label>
-                  <label class="switch switch--material">
-                      <ons-input type="date" name= "test" float id="dateState"></ons-input>
-                    
-                  </label>
-                </ons-list-item>
-
-                <ons-list-item>
-                    <label for="graphState-1" class="right">
-                      Heure hh:mm:ss
-                    </label>
-                    <label>
-                        <ons-input type="time" name= "test" float id="timeState"></ons-input>
-                      
-                    </label>
-                  </ons-list-item>
+              
                   <ons-list-item>
                       <label for="graphState-1" class="right">
                         Nom  
@@ -276,11 +253,42 @@
                             </label>
                           </ons-list-item>
                           <ons-list-item>
+                  <label for="graphState-1" class="right">
+                    Date JJ/MM/YYYY
+                  </label>
+                  <label class="switch switch--material">
+                      <ons-input type="date" disabled name= "test" float id="dateState"></ons-input>
+                    
+                  </label>
+                </ons-list-item>
+
+                <ons-list-item>
+                    <label for="graphState-1" class="right">
+                      Heure hh:mm:ss
+                    </label>
+                    <label>
+                        <ons-input type="time" disabled name= "test" float id="timeState"></ons-input>
+                      
+                    </label>
+                  </ons-list-item>
+                          <ons-list-item>
                               <label for="graphState-1" class="right">
                                 Mode Bluetooth infini
                               </label>
                               <label class="switch switch--material">
-                                <input type="checkbox" class="switch__input switch--material__input" input-id="graphState-1" id="blueState">
+                                <input type="checkbox" disabled class="switch__input switch--material__input" input-id="graphState-1" id="blueState">
+                                <div class="switch__toggle switch--material__toggle">
+                                  <div class="switch__handle switch--material__handle">
+                                  </div>
+                                </div>
+                              </label>
+                            </ons-list-item>
+                            <ons-list-item>
+                              <label for="formatState-1" class="right">
+                                Formatter
+                              </label>
+                              <label class="switch switch--material">
+                                <input type="checkbox" disabled class="switch__input switch--material__input" input-id="formatState-1" id="formatState">
                                 <div class="switch__toggle switch--material__toggle">
                                   <div class="switch__handle switch--material__handle">
                                   </div>
