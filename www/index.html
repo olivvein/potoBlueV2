@@ -22,11 +22,8 @@
         <ons-splitter-side id="menu" side="left" width="220px" collapse swipeable>
             <ons-page>
                 <ons-list>
-                    <ons-list-item onclick="app.load('home.html')" tappable>
-                        Acceuil
-                    </ons-list-item>
                     <ons-list-item onclick="app.load('action.html')" tappable>
-                        Actions
+                        Tableau de bord
                     </ons-list-item>
                     <ons-list-item onclick="app.load('settings.html')" tappable>
                         Configuration
@@ -145,7 +142,7 @@
             
             
             <div class="toast__message toast--material__message"></div>
-            <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Quit</button>
+            <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Déconnecter</button>
         </div>
         </ons-page>
         
@@ -396,7 +393,7 @@
 
           <div class="toast toast--material">
             <div class="toast__message toast--material__message"></div>
-            <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Quit</button>
+            <button id="disconnectButton" onClick="app.disconnect()" class="toast__button toast--material__button">Déconnecter</button>
         </div>
           
         
