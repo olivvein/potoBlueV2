@@ -1217,7 +1217,7 @@ var app = {
             result.forEach(function(rr) {
 
                 if (rr[2] != undefined) {
-                    if (firstTime == "") {
+                    if (firstTime == "0") {
                         firstTime = rr[0];
                     }
                     lastTime = rr[0];
