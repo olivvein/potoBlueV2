@@ -263,6 +263,9 @@ var app = {
                 if(theMode=="chart"){
                     app.sendCommand("chart,0");
                 }
+                if(theMode=="livecount"){
+                    app.sendCommand("liveCount,0");
+                }
                
                 if (page == "settings.html") {
                     theMode = "settings";
@@ -283,7 +286,7 @@ var app = {
                 }
                 if (page == "livecount.html") {
                     theMode = "livecount";
-                    screen.lockOrientation('portrait');
+                    screen.orientation.lock('portrait');
                     app.askInfosN();
                 }
                 
@@ -456,7 +459,7 @@ var app = {
                 myDevice = deviceId;
                 myDeviceName = nameT;
                 app.load("action.html");
-                app.askInfosN();
+                //app.askInfosN();
 
                 //app.getFileList();
             };
