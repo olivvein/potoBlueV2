@@ -19,7 +19,7 @@
 'use strict';
 
 
-//motdepasse="poteau932IDJsi"
+//thefinalCutOfTheThing="poteau932IDJsi"
 
 var x = 0;
 var lasty = 0;
@@ -73,11 +73,11 @@ function unixToDub(unix) {
 }
 
 function dubToHuman(dub){
-    return moment(dubToUnix(dub)).subtract(1,"hours").tz("Europe/Paris").format("DD/MM/YYYY HH:mm:ss");
+    return moment(dubToUnix(dub)).subtract(0,"hours").tz("Europe/Paris").format("DD/MM/YYYY HH:mm:ss");
 }
 
 function humanToDub(human){
-    return unixToDub(moment(human, "DD/MM/YYYY HH:mm:ss").add(1,"hours"));
+    return unixToDub(moment(human, "DD/MM/YYYY HH:mm:ss").add(0,"hours"));
 }
 
 function dynamicSort(property) {
@@ -96,7 +96,7 @@ var objD = {};
 var modal = document.querySelector('ons-modal');
 var myDeviceName = "";
 var theMode = "normal";
-var toiMemeTuSais = "kD0%mspEl"; 
+var toiMemeTuSais = "WXtmF%qXd"; 
 var myDevice = "";
 var buffLen = 10000;
 var dataBuffer = new Uint8Array(buffLen);
